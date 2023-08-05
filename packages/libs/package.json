@@ -6,15 +6,20 @@
   "scripts": {
     "start": "ts-node src/eas.ts",
     "build": "tsc",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "compile": "graphql-codegen",
+    "watch": "graphql-codegen -w"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "@ethereum-attestation-service/eas-sdk": "0.29.1",
-    "ethers": "^5.0.0"
+    "ethers": "^5.0.0",
+    "graphql": "^16.7.1"
   },
   "devDependencies": {
+    "@graphql-codegen/cli": "^5.0.0",
+    "@graphql-codegen/client-preset": "^4.1.0",
     "ts-node": "^10.9.1",
     "typescript": "^5.1.6"
   }

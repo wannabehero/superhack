@@ -1,5 +1,6 @@
 import { providers, ethers } from 'ethers';
 import { EAS, SchemaEncoder, SchemaItem, compactOffchainAttestationPackage, CompactAttestationShareablePackageObject} from '@ethereum-attestation-service/eas-sdk';
+import { GetAttestations } from './eas_gql';
 
 export const EASContractAddress = '0xC2679fBD37d54388Ce493F1DB75320D236e1815e'; // Sepolia v0.26
 
@@ -123,9 +124,11 @@ const templateStatsSchema = new SchemaDefinition(
 );
 
 (async () => {
-  const uid = await client.createTempateStatsAttestation(wallet, [
-    { name: 'blob', value: ['0x12'], type: 'bytes[]' },
-    { name: 'version', value: 13, type: 'uint8' },
-  ]);
-  console.log(uid);
+  // const uid = await client.createTempateStatsAttestation(wallet, [
+  //   { name: 'blob', value: ['0x21', '0x30'], type: 'bytes[]' },
+  //   { name: 'version', value: 100, type: 'uint8' },
+  // ]);
+  // console.log(uid);
+  const data = GetAttestations("0x4c365ddb28653faab690386a4930cb3a5d4a7759634f80977db900db53c95857")
+  console.log(data);
 })();
