@@ -1,10 +1,10 @@
 import { providers, ethers } from 'ethers';
-import { EAS, SchemaEncoder, SchemaItem } from '@ethereum-attestation-service/eas-sdk';
+import { EAS, SchemaEncoder, SchemaItem, compactOffchainAttestationPackage, CompactAttestationShareablePackageObject} from '@ethereum-attestation-service/eas-sdk';
 
 export const EASContractAddress = '0xC2679fBD37d54388Ce493F1DB75320D236e1815e'; // Sepolia v0.26
-// export const EASContractAddress = '0x4200000000000000000000000000000000000020'; // optimism
 
 const key = 'haha';
+const offchainStorageUrl = 'https://sepolia.easscan.org/offchain/store';
 const provider = new providers.JsonRpcProvider('https://sepolia.gateway.tenderly.co');
 const wallet = new ethers.Wallet(key, provider);
 
@@ -60,29 +60,42 @@ class EASClient {
     params: SchemaItem[],
     schema: SchemaDefinition,
   ): Promise<string> {
-    // const uid = '0xff08bbf3d3e6e0992fc70ab9b9370416be59e87897c3d42b20549901d2cccc3e';
-
-    // const attestation = await this.eas.getAttestation(uid);
-    // console.log(attestation);
-
     const offchain = await this.eas.getOffchain();
-
     const encodedData = schema.encodeData(params);
+    const time = Math.floor(Date.now() / 1000); 
     const offchainAttestation = await offchain.signOffchainAttestation(
       {
         recipient: '0xe98bA1B3801d105Ee7C8611E34D9048985b2EFA1',
         expirationTime: BigInt(0),
-        time: BigInt(Math.floor(Date.now() / 1000)),
-        revocable: true,
+        time: time,
+        revocable: false,
         version: 1,
-        nonce: BigInt(0),
+        nonce: 0,
         schema: schema.uid,
         refUID: '0x0000000000000000000000000000000000000000000000000000000000000000',
         data: encodedData,
       },
       signer,
     );
-    console.log(offchainAttestation);
+    const pkg: CompactAttestationShareablePackageObject = compactOffchainAttestationPackage({
+      sig: offchainAttestation,
+      signer: signer.address,
+    })
+    const body = JSON.stringify({
+      filename: `schema-378-attestation-${time}.eas.txt`,
+      textJson: JSON.stringify({
+        'sig': offchainAttestation,
+        'signer': signer.address,
+      }, (_, v) => typeof v === 'bigint' ? v.toString() : v),
+    })
+    await fetch(offchainStorageUrl, {
+      method: 'POST',
+      body: body,
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      },
+    });
     return offchainAttestation.uid;
   }
 }
@@ -110,7 +123,7 @@ const templateStatsSchema = new SchemaDefinition(
 );
 
 (async () => {
-  const uid = await client.createTempateAttestation(wallet as any, [
+  const uid = await client.createTempateStatsAttestation(wallet, [
     { name: 'blob', value: ['0x12'], type: 'bytes[]' },
     { name: 'version', value: 13, type: 'uint8' },
   ]);
