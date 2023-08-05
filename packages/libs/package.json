@@ -11,7 +11,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@ethereum-attestation-service/eas-sdk": "^1.0.0-beta.0"
+    "@ethereum-attestation-service/eas-sdk": "0.29.1"
   },
   "devDependencies": {
     "ts-node": "^10.9.1",
