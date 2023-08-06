@@ -5,7 +5,7 @@
   "main": "src/index.ts",
   "types": "src/index.ts",
   "scripts": {
-    "start": "ts-node src/eas.ts",
+    "start": "ts-node src/eas/index.ts",
     "build": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1",
     "compile": "graphql-codegen",

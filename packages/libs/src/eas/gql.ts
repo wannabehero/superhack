@@ -1,6 +1,6 @@
 import { ApolloClient, InMemoryCache } from '@apollo/client';
 
-import { gql } from './__generated__/gql';
+import { gql } from '../__generated__/gql';
 
 const apolloClient = new ApolloClient({
   uri: 'https://sepolia.easscan.org/graphql',
