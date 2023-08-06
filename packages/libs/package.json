@@ -2,7 +2,8 @@
   "name": "libs",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
   "scripts": {
     "start": "ts-node src/eas.ts",
     "build": "tsc",
@@ -13,6 +14,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@apollo/client": "^3.7.17",
     "@ethereum-attestation-service/eas-sdk": "0.29.1",
     "ethers": "^5.0.0",
     "graphql": "^16.7.1"

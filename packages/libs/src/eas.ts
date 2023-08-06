@@ -1,5 +1,11 @@
 import { providers, ethers } from 'ethers';
-import { EAS, SchemaEncoder, SchemaItem, compactOffchainAttestationPackage, CompactAttestationShareablePackageObject} from '@ethereum-attestation-service/eas-sdk';
+import {
+  EAS,
+  SchemaEncoder,
+  SchemaItem,
+  compactOffchainAttestationPackage,
+  CompactAttestationShareablePackageObject,
+} from '@ethereum-attestation-service/eas-sdk';
 import { GetAttestations } from './eas_gql';
 
 export const EASContractAddress = '0xC2679fBD37d54388Ce493F1DB75320D236e1815e'; // Sepolia v0.26
@@ -63,7 +69,7 @@ class EASClient {
   ): Promise<string> {
     const offchain = await this.eas.getOffchain();
     const encodedData = schema.encodeData(params);
-    const time = Math.floor(Date.now() / 1000); 
+    const time = Math.floor(Date.now() / 1000);
     const offchainAttestation = await offchain.signOffchainAttestation(
       {
         recipient: '0xe98bA1B3801d105Ee7C8611E34D9048985b2EFA1',
@@ -81,14 +87,17 @@ class EASClient {
     const pkg: CompactAttestationShareablePackageObject = compactOffchainAttestationPackage({
       sig: offchainAttestation,
       signer: signer.address,
-    })
+    });
     const body = JSON.stringify({
       filename: `schema-378-attestation-${time}.eas.txt`,
-      textJson: JSON.stringify({
-        'sig': offchainAttestation,
-        'signer': signer.address,
-      }, (_, v) => typeof v === 'bigint' ? v.toString() : v),
-    })
+      textJson: JSON.stringify(
+        {
+          sig: offchainAttestation,
+          signer: signer.address,
+        },
+        (_, v) => (typeof v === 'bigint' ? v.toString() : v),
+      ),
+    });
     await fetch(offchainStorageUrl, {
       method: 'POST',
       body: body,
@@ -129,6 +138,8 @@ const templateStatsSchema = new SchemaDefinition(
   //   { name: 'version', value: 100, type: 'uint8' },
   // ]);
   // console.log(uid);
-  const data = GetAttestations("0x4c365ddb28653faab690386a4930cb3a5d4a7759634f80977db900db53c95857")
+  const data = GetAttestations(
+    '0x4c365ddb28653faab690386a4930cb3a5d4a7759634f80977db900db53c95857',
+  );
   console.log(data);
 })();

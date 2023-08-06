@@ -4,7 +4,7 @@ import { WagmiConfig } from 'wagmi';
 
 import { chains, wagmiConfig } from './web3/wallets';
 import Header from './components/Header';
-import Safes from './screens/Safes';
+import Main from './screens/Main';
 
 function App() {
   const { colorMode } = useColorMode();
@@ -19,7 +19,7 @@ function App() {
         <Container py="16px">
           <VStack align="stretch">
             <Header />
-            <Safes />
+            <Main />
           </VStack>
         </Container>
       </RainbowKitProvider>

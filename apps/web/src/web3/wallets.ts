@@ -2,12 +2,12 @@ import '@rainbow-me/rainbowkit/styles.css';
 
 import { getDefaultWallets } from '@rainbow-me/rainbowkit';
 import { configureChains, createConfig } from 'wagmi';
-import { baseGoerli, optimism } from 'wagmi/chains';
 import { publicProvider } from 'wagmi/providers/public';
+import { CHAINS } from './consts';
 
 const WC_PROJECT_ID = import.meta.env.VITE_WC_PROJECT_ID;
 
-export const { chains, publicClient } = configureChains([optimism, baseGoerli], [publicProvider()]);
+export const { chains, publicClient } = configureChains(CHAINS, [publicProvider()]);
 
 const { connectors } = getDefaultWallets({
   chains,
