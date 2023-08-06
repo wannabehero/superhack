@@ -1,4 +1,5 @@
 import { providers, ethers } from 'ethers';
+import { Constant } from '../constant/index';
 import {
   EAS,
   SchemaEncoder,
@@ -6,21 +7,16 @@ import {
   compactOffchainAttestationPackage,
   CompactAttestationShareablePackageObject,
 } from '@ethereum-attestation-service/eas-sdk';
-import { GetAttestations } from './gql';
 
 export const EASContractAddress = '0xC2679fBD37d54388Ce493F1DB75320D236e1815e'; // Sepolia v0.26
-
-const key = 'haha';
-const offchainStorageUrl = 'https://sepolia.easscan.org/offchain/store';
-const provider = new providers.JsonRpcProvider('https://sepolia.gateway.tenderly.co');
-const wallet = new ethers.Wallet(key, provider);
+const provider = new providers.JsonRpcProvider(Constant.easProviderUri);
 
 class EASClient {
   private eas: EAS;
 
   constructor() {
     const eas = new EAS(EASContractAddress);
-    eas.connect(wallet);
+    eas.connect(provider);
     this.eas = eas;
   }
 
@@ -98,7 +94,7 @@ class EASClient {
         (_, v) => (typeof v === 'bigint' ? v.toString() : v),
       ),
     });
-    await fetch(offchainStorageUrl, {
+    await fetch(Constant.easOffchainUri, {
       method: 'POST',
       body: body,
       headers: {
@@ -131,15 +127,3 @@ const templateStatsSchema = new SchemaDefinition(
   '0x4c365ddb28653faab690386a4930cb3a5d4a7759634f80977db900db53c95857',
   'bytes[] blob, uint8 version',
 );
-
-(async () => {
-  // const uid = await client.createTempateStatsAttestation(wallet, [
-  //   { name: 'blob', value: ['0x21', '0x30'], type: 'bytes[]' },
-  //   { name: 'version', value: 100, type: 'uint8' },
-  // ]);
-  // console.log(uid);
-  const data = await GetAttestations(
-    '0x4c365ddb28653faab690386a4930cb3a5d4a7759634f80977db900db53c95857',
-  );
-  console.log(data);
-})();

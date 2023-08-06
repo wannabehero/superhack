@@ -1,9 +1,10 @@
 import { ApolloClient, InMemoryCache } from '@apollo/client';
+import { Constant } from '../constant/index';
 
 import { gql } from '../__generated__/gql';
 
 const apolloClient = new ApolloClient({
-  uri: 'https://sepolia.easscan.org/graphql',
+  uri: Constant.apolloClientUri,
   cache: new InMemoryCache(),
 });
 
