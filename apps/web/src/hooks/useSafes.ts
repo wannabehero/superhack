@@ -3,13 +3,7 @@ import { Address } from 'viem';
 
 import { listSafes } from '../web3/safe';
 
-const useSafes = ({
-  chainId,
-  owner,
-}: {
-  chainId: number | undefined;
-  owner: Address | undefined;
-}) => {
+const useSafes = ({ chainId, owner }: { chainId?: number; owner?: Address }) => {
   const [safes, setSafes] = useState<string[]>();
 
   const fetchSafes = useCallback(() => {
