@@ -20,18 +20,17 @@ import {
 import { AddIcon } from '@chakra-ui/icons';
 import { useMemo, useState } from 'react';
 
-import { etherscan } from 'libs';
 import ActionBuilder from './ActionBuilder';
 import { CHAINS } from '../web3/consts';
 import { formatABIItem } from '../utils/abi';
-
-type Action = { func: etherscan.ABIItem; inputs: Record<string, any> };
+import { Action, Shortcut } from '../types/shortcut';
 
 interface ShortcutBuilderProps {
-  onPublish: (shortcut: { name: string; chainId: number; actions: Action[] }) => void;
+  onPublish: (shortcut: Shortcut) => void;
+  onRun: (shortcut: Shortcut) => void;
 }
 
-const ShortcutBuilder = ({ onPublish }: ShortcutBuilderProps) => {
+const ShortcutBuilder = ({ onPublish, onRun }: ShortcutBuilderProps) => {
   const [name, setName] = useState<string>('');
   const [chainId, setChainId] = useState<number>(CHAINS[0].id);
   const [actions, setActions] = useState<Action[]>([]);
@@ -100,6 +99,13 @@ const ShortcutBuilder = ({ onPublish }: ShortcutBuilderProps) => {
           onClick={() => onPublish({ name, chainId, actions })}
         >
           Publish
+        </Button>
+        <Button
+          colorScheme="pink"
+          isDisabled={!isPublishButtonEnabled}
+          onClick={() => onRun({ name, chainId, actions })}
+        >
+          Run
         </Button>
       </VStack>
       <Modal isOpen={isAddActionModalOpen} size="xl" onClose={() => setIsAddActionModalOpen(false)}>

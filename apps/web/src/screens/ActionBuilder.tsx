@@ -14,10 +14,12 @@ import { useEffect, useMemo, useState } from 'react';
 
 import { etherscan } from 'libs';
 import { formatABIItem } from '../utils/abi';
+import { Action } from '../types/shortcut';
+import { Address } from 'viem';
 
 interface ActionBuilderProps {
   chainId: number;
-  onDone: (action: { func: etherscan.ABIItem; inputs: Record<string, any> }) => void;
+  onDone: (action: Action) => void;
 }
 
 const ActionBuilder = ({ chainId, onDone }: ActionBuilderProps) => {
@@ -103,7 +105,7 @@ const ActionBuilder = ({ chainId, onDone }: ActionBuilderProps) => {
           alignSelf="flex-start"
           colorScheme="blue"
           isDisabled={!isButtonEnabled}
-          onClick={() => !!func && onDone({ func, inputs })}
+          onClick={() => !!func && onDone({ func, inputs, contract: contractAddress as Address })}
         >
           Done
         </Button>

@@ -6,6 +6,8 @@ solc = "0.8.21"
 
 [rpc_endpoints]
 base-goerli = "https://goerli.base.org"
+sepolia = "https://eth-sepolia.public.blastapi.io"
 
 [etherscan]
 base-goerli = { key = "${BASESCAN_API_KEY}", chain = "base-goerli" }
+sepolia = { key = "${ETHERSCAN_API_KEY}", chain = "sepolia" }
