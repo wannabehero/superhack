@@ -15,7 +15,22 @@ import { useEffect, useMemo, useState } from 'react';
 import { etherscan } from 'libs';
 import { formatABIItem } from '../utils/abi';
 import { Action } from '../types/shortcut';
-import { Address } from 'viem';
+import { Address, isAddress } from 'viem';
+
+function validateInput(type: string, value: string): boolean {
+  switch (type) {
+    case 'address':
+      return isAddress(value);
+    case type.startsWith('uint') ? type : '':
+      try {
+        return BigInt(value) >= 0;
+      } catch {
+        return false;
+      }
+    default:
+      return true;
+  }
+}
 
 interface ActionBuilderProps {
   chainId: number;
@@ -56,7 +71,13 @@ const ActionBuilder = ({ chainId, onDone }: ActionBuilderProps) => {
       return false;
     }
 
-    return func.inputs.every((input) => !!inputs[input.name]);
+    return func.inputs.reduce((acc, input) => {
+      if (!acc) {
+        return acc;
+      }
+
+      return validateInput(input.type, inputs[input.name]);
+    }, true);
   }, [func, inputs]);
 
   return (
@@ -88,15 +109,17 @@ const ActionBuilder = ({ chainId, onDone }: ActionBuilderProps) => {
         {!!func && (
           <VStack>
             {func.inputs.map((input, idx) => (
-              <InputGroup key={`${func.name}-${idx}`}>
-                {input.name.length && <InputLeftAddon children={input.name} />}
-                <Input
-                  placeholder={input.name}
-                  onChange={(e) => setInputs({ ...inputs, [input.name]: e.target.value })}
-                  value={inputs[input.name] ?? ''}
-                />
-                <InputRightAddon children={input.type} />
-              </InputGroup>
+              <FormControl isInvalid={!validateInput(input.type, inputs[input.name])}>
+                <InputGroup key={`${func.name}-${idx}`}>
+                  {input.name.length && <InputLeftAddon children={input.name} />}
+                  <Input
+                    placeholder={input.name}
+                    onChange={(e) => setInputs({ ...inputs, [input.name]: e.target.value })}
+                    value={inputs[input.name] ?? ''}
+                  />
+                  <InputRightAddon children={input.type} />
+                </InputGroup>
+              </FormControl>
             ))}
           </VStack>
         )}

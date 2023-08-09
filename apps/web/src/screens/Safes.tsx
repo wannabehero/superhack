@@ -1,5 +1,16 @@
 import { useAccount, useChainId } from 'wagmi';
-import { HStack, VStack, Text, Spacer, IconButton, Button, useToast } from '@chakra-ui/react';
+import {
+  HStack,
+  VStack,
+  Text,
+  Spacer,
+  IconButton,
+  Button,
+  useToast,
+  Card,
+  CardBody,
+  Flex,
+} from '@chakra-ui/react';
 
 import useSafes from '../hooks/useSafes';
 import { RepeatIcon } from '@chakra-ui/icons';
@@ -55,7 +66,22 @@ const Safes = () => {
             Deploy new
           </Button>
         </HStack>
-        <VStack>{!!safes && safes.map((safe) => <Text key={safe}>{safe}</Text>)}</VStack>
+        <VStack alignItems="stretch">
+          {!!safes &&
+            safes.map((safe) => (
+              <Card
+                key={`safe-${safe}`}
+                _hover={{ opacity: 0.8, cursor: 'pointer' }}
+                variant="outline"
+              >
+                <CardBody>
+                  <Flex align="center">
+                    <Text>{safe}</Text>
+                  </Flex>
+                </CardBody>
+              </Card>
+            ))}
+        </VStack>
       </VStack>
     </>
   );

@@ -1,8 +1,5 @@
 import {
   Button,
-  Card,
-  CardBody,
-  Flex,
   FormControl,
   FormHelperText,
   FormLabel,
@@ -22,8 +19,8 @@ import { useMemo, useState } from 'react';
 
 import ActionBuilder from './ActionBuilder';
 import { CHAINS } from '../web3/consts';
-import { formatABIItem } from '../utils/abi';
 import { Action, Shortcut } from '../types/shortcut';
+import ActionsList from '../components/ActionsList';
 
 interface ShortcutBuilderProps {
   onPublish: (shortcut: Shortcut) => void;
@@ -68,21 +65,7 @@ const ShortcutBuilder = ({ onPublish, onRun }: ShortcutBuilderProps) => {
             <Text fontSize="l" fontWeight="medium">
               Actions
             </Text>
-            <VStack alignItems="stretch">
-              {actions.map((action, idx) => (
-                <Card
-                  key={`action-${idx}`}
-                  _hover={{ opacity: 0.8, cursor: 'pointer' }}
-                  variant="outline"
-                >
-                  <CardBody>
-                    <Flex align="center">
-                      <Text>{formatABIItem({ item: action.func, inputs: action.inputs })}</Text>
-                    </Flex>
-                  </CardBody>
-                </Card>
-              ))}
-            </VStack>
+            <ActionsList actions={actions} />
             <Button
               leftIcon={<AddIcon />}
               onClick={() => setIsAddActionModalOpen(true)}

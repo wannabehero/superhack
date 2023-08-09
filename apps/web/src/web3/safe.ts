@@ -15,7 +15,7 @@ interface SafesByOwnerResponse {
   safes: string[];
 }
 
-export async function listSafes(chainId: number, owner: Address): Promise<string[]> {
+export async function listSafes(chainId: number, owner: Address): Promise<Address[]> {
   if (chainId in BASE_URLS === false) {
     throw new Error(`Unsupported chainId: ${chainId}`);
   }
@@ -23,7 +23,7 @@ export async function listSafes(chainId: number, owner: Address): Promise<string
   const data: SafesByOwnerResponse = await fetch(
     `${BASE_URLS[chainId]}/api/v1/owners/${owner}/safes/`,
   ).then((res) => res.json());
-  return data.safes;
+  return data.safes as Address[];
 }
 
 export const useEthersAdapter = ({ chainId }: { chainId: number }) => {
