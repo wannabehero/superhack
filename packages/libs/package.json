@@ -16,8 +16,10 @@
   "dependencies": {
     "@apollo/client": "^3.7.17",
     "@ethereum-attestation-service/eas-sdk": "0.29.1",
+    "@web-std/file": "^3.0.2",
     "ethers": "^5.0.0",
-    "graphql": "^16.7.1"
+    "graphql": "^16.7.1",
+    "web3.storage": "^4.5.5"
   },
   "devDependencies": {
     "@graphql-codegen/cli": "^5.0.0",

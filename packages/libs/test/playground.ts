@@ -1,8 +1,10 @@
+import { Address, fromHex, toHex } from 'viem';
 import { providers, ethers } from 'ethers';
 import { client } from '../src/eas/index';
 import { GetAttestations } from '../src/eas/gql';
 import { Constant } from '../src/constant/index';
 import { simulateTx } from '../src/tenderly/index';
+import { store, retrieve } from '../src/ipfs/index';
 
 const provider = new providers.JsonRpcProvider(Constant.easProviderUri);
 
@@ -49,19 +51,21 @@ const provider = new providers.JsonRpcProvider(Constant.easProviderUri);
       "type": "function"
     }
   ]
+  const id = await store(contractABI);
+  console.log(await retrieve(toHex('bafybeiajff5yrw46jf2ot7i5yvfzixzhw3w2bmfuvrjcwylceyzsjejd4a')));
 
-  const tx = await simulateTx({
-    contract: {
-      abi: contractABI,
-      contractAddress: "0xf35101b37928bb044ff5339bc6ff816b68bd5c43",
-      provider: provider,
-      funcName: "store",
-      args: [123],
-    },
-    type: 'quick',
-    sender: '0xe98bA1B3801d105Ee7C8611E34D9048985b2EFA1',
-    network_id: '1',
-    value: 0,
-  });
-  console.log(tx);
+  // const tx = await simulateTx({
+  //   contract: {
+  //     abi: contractABI,
+  //     contractAddress: "0xf35101b37928bb044ff5339bc6ff816b68bd5c43",
+  //     provider: provider,
+  //     funcName: "store",
+  //     args: [123],
+  //   },
+  //   type: 'quick',
+  //   sender: '0xe98bA1B3801d105Ee7C8611E34D9048985b2EFA1',
+  //   network_id: '1',
+  //   value: 0,
+  // });
+  // console.log(tx);
 })();
