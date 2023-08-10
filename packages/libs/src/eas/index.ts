@@ -1,4 +1,4 @@
-import { providers, ethers } from 'ethers';
+import { providers, ethers, TypedDataDomain, TypedDataField } from 'ethers';
 import { Constant } from '../constant/index';
 import {
   EAS,
@@ -6,6 +6,7 @@ import {
   SchemaItem,
   compactOffchainAttestationPackage,
   CompactAttestationShareablePackageObject,
+  TypedDataSigner,
 } from '@ethereum-attestation-service/eas-sdk';
 
 export const EASContractAddress = '0xC2679fBD37d54388Ce493F1DB75320D236e1815e'; // Sepolia v0.26
@@ -20,12 +21,16 @@ class EASClient {
     this.eas = eas;
   }
 
-  async createTempateAttestation(signer: ethers.Signer, params: SchemaItem[]): Promise<string> {
+  async createTemplateAttestation(signer: ethers.Signer, params: SchemaItem[]): Promise<string> {
     return await this.createAttestation(signer, params, templateSchema);
   }
 
+  async createShortcutActionsAttestation(signer: ethers.Signer, params: SchemaItem[]): Promise<string> {
+    return await this.createOffchainAttestation(signer, params, templateSchema);
+  }
+
   async createTempateStatsAttestation(
-    signer: ethers.Wallet,
+    signer: ethers.Signer,
     params: SchemaItem[],
   ): Promise<string> {
     return await this.createOffchainAttestation(signer, params, templateStatsSchema);
@@ -53,16 +58,20 @@ class EASClient {
         expirationTime: BigInt(0),
         revocable: false,
         data: encodedData,
-      },
-    });
+      }
+    }, {
+      gasLimit: 1000000000,
+    }
+    );
     return await tx.wait();
   }
 
   private async createOffchainAttestation(
-    signer: ethers.Wallet,
+    signer: ethers.Signer,
     params: SchemaItem[],
     schema: SchemaDefinition,
   ): Promise<string> {
+    const address = await signer.getAddress();
     const offchain = await this.eas.getOffchain();
     const encodedData = schema.encodeData(params);
     const time = Math.floor(Date.now() / 1000);
@@ -78,23 +87,20 @@ class EASClient {
         refUID: '0x0000000000000000000000000000000000000000000000000000000000000000',
         data: encodedData,
       },
+      // @ts-expect-error
       signer,
     );
-    const pkg: CompactAttestationShareablePackageObject = compactOffchainAttestationPackage({
-      sig: offchainAttestation,
-      signer: signer.address,
-    });
     const body = JSON.stringify({
       filename: `schema-378-attestation-${time}.eas.txt`,
       textJson: JSON.stringify(
         {
           sig: offchainAttestation,
-          signer: signer.address,
+          signer: address,
         },
         (_, v) => (typeof v === 'bigint' ? v.toString() : v),
       ),
     });
-    await fetch(Constant.easOffchainUri, {
+    const response = await fetch(Constant.easOffchainUri, {
       method: 'POST',
       body: body,
       headers: {
