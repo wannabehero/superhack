@@ -1,13 +1,11 @@
-import { providers, ethers, TypedDataDomain, TypedDataField } from 'ethers';
+import { providers, ethers } from 'ethers';
 import { Constant } from '../constant/index';
 import {
   EAS,
   SchemaEncoder,
   SchemaItem,
-  compactOffchainAttestationPackage,
-  CompactAttestationShareablePackageObject,
-  TypedDataSigner,
 } from '@ethereum-attestation-service/eas-sdk';
+import { Template, TemplateUpvote } from './types';
 
 export const EASContractAddress = '0xC2679fBD37d54388Ce493F1DB75320D236e1815e'; // Sepolia v0.26
 const provider = new providers.JsonRpcProvider(Constant.easProviderUri);
@@ -21,27 +19,12 @@ class EASClient {
     this.eas = eas;
   }
 
-  async createTemplateAttestation(signer: ethers.Signer, params: SchemaItem[]): Promise<string> {
-    return await this.createAttestation(signer, params, templateSchema);
+  async publish(signer: ethers.Signer, template: Template): Promise<string> {
+    return await this.createAttestation(signer, template.items(), templateSchema);
   }
 
-  async createShortcutActionsAttestation(signer: ethers.Signer, params: SchemaItem[]): Promise<string> {
-    return await this.createOffchainAttestation(signer, params, templateSchema);
-  }
-
-  async createTempateStatsAttestation(
-    signer: ethers.Signer,
-    params: SchemaItem[],
-  ): Promise<string> {
-    return await this.createOffchainAttestation(signer, params, templateStatsSchema);
-  }
-
-  async getTemplates() {
-    // TODO: graphql query to fetch template attestations by scheme
-  }
-
-  async getTemplateStats() {
-    // TODO: graphql query to fetch usage stats per template
+  async upvote(signer: ethers.Signer, templateUpvote: TemplateUpvote): Promise<string> {
+    return await this.createAttestation(signer, templateUpvote.items(), templateUpvoteSchema);
   }
 
   private async createAttestation(
@@ -54,7 +37,7 @@ class EASClient {
     const tx = await this.eas.attest({
       schema: schema.uid,
       data: {
-        recipient: '0xe98bA1B3801d105Ee7C8611E34D9048985b2EFA1',
+        recipient: '0x9799c803E4D9e278603872922A24846FbB9B924D',
         expirationTime: BigInt(0),
         revocable: false,
         data: encodedData,
@@ -64,51 +47,6 @@ class EASClient {
     }
     );
     return await tx.wait();
-  }
-
-  private async createOffchainAttestation(
-    signer: ethers.Signer,
-    params: SchemaItem[],
-    schema: SchemaDefinition,
-  ): Promise<string> {
-    const address = await signer.getAddress();
-    const offchain = await this.eas.getOffchain();
-    const encodedData = schema.encodeData(params);
-    const time = Math.floor(Date.now() / 1000);
-    const offchainAttestation = await offchain.signOffchainAttestation(
-      {
-        recipient: '0xe98bA1B3801d105Ee7C8611E34D9048985b2EFA1',
-        expirationTime: BigInt(0),
-        time: time,
-        revocable: false,
-        version: 1,
-        nonce: 0,
-        schema: schema.uid,
-        refUID: '0x0000000000000000000000000000000000000000000000000000000000000000',
-        data: encodedData,
-      },
-      // @ts-expect-error
-      signer,
-    );
-    const body = JSON.stringify({
-      filename: `schema-378-attestation-${time}.eas.txt`,
-      textJson: JSON.stringify(
-        {
-          sig: offchainAttestation,
-          signer: address,
-        },
-        (_, v) => (typeof v === 'bigint' ? v.toString() : v),
-      ),
-    });
-    const response = await fetch(Constant.easOffchainUri, {
-      method: 'POST',
-      body: body,
-      headers: {
-        'Content-Type': 'application/json',
-        Accept: 'application/json',
-      },
-    });
-    return offchainAttestation.uid;
   }
 }
 
@@ -124,12 +62,11 @@ class SchemaDefinition extends SchemaEncoder {
   }
 }
 
-// TODO: update with actual data
 const templateSchema = new SchemaDefinition(
-  '0x4c365ddb28653faab690386a4930cb3a5d4a7759634f80977db900db53c95857',
-  'bytes[] blob, uint8 version',
+  '0x3241293e9d8ffba33b19091ee6235b62949848348ec423856cbb59a93ef8a438',
+  'string name, uint32 chain_id, string ipfs_id',
 );
-const templateStatsSchema = new SchemaDefinition(
-  '0x4c365ddb28653faab690386a4930cb3a5d4a7759634f80977db900db53c95857',
-  'bytes[] blob, uint8 version',
+const templateUpvoteSchema = new SchemaDefinition(
+  '0x6407330affce7ce561a90b2bd380911c1e64becd8fa3ebeccd84aaee01fc292a',
+  'string template_id',
 );
