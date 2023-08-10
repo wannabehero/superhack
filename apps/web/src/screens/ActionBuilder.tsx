@@ -109,7 +109,10 @@ const ActionBuilder = ({ chainId, onDone }: ActionBuilderProps) => {
         {!!func && (
           <VStack>
             {func.inputs.map((input, idx) => (
-              <FormControl isInvalid={!validateInput(input.type, inputs[input.name])}>
+              <FormControl
+                key={`${input.name}-${idx}`}
+                isInvalid={!validateInput(input.type, inputs[input.name])}
+              >
                 <InputGroup key={`${func.name}-${idx}`}>
                   {input.name.length && <InputLeftAddon children={input.name} />}
                   <Input
