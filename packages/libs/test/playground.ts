@@ -1,6 +1,6 @@
 import { providers, ethers } from 'ethers';
 import { Constant, TestConstant } from '../src/constant/index';
-import { localShortcuts, publish, retrieve, retrieveAll, simulate, upvote, upvoteCount } from '../src/shortcut';
+import { loadLocalShortcuts, publish, retrieve, retrieveAll, simulate, upvote, upvoteCount } from '../src/shortcut';
 import { ABIItem } from '../src/etherscan';
 
 const provider = new providers.JsonRpcProvider(
@@ -44,7 +44,7 @@ const provider = new providers.JsonRpcProvider(
   //   ]
   // }));
 
-  
+
   // const uid = await client.createTempateStatsAttestation(wallet, [
   //   { name: 'blob', value: ['0x21', '0x30'], type: 'bytes[]' },
   //   { name: 'version', value: 100, type: 'uint8' },
@@ -56,7 +56,7 @@ const provider = new providers.JsonRpcProvider(
   // );
   // console.log(data);
 
-// 
+//
   // const tx = await simulateTx({
   //   contract: {
   //     abi: contractABI,
@@ -71,7 +71,7 @@ const provider = new providers.JsonRpcProvider(
   //   value: 0,
   // });
   // console.log(tx);
-  
+
   // const id = await store(contractABI);
   // console.log(await retrieve(toHex('bafybeiajff5yrw46jf2ot7i5yvfzixzhw3w2bmfuvrjcwylceyzsjejd4a')));
 

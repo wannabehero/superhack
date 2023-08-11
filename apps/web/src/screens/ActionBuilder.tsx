@@ -12,9 +12,8 @@ import {
 } from '@chakra-ui/react';
 import { useEffect, useMemo, useState } from 'react';
 
-import { etherscan } from 'libs';
+import { Action, etherscan } from 'libs';
 import { formatABIItem } from '../utils/abi';
-import { Action } from '../types/shortcut';
 import { Address, isAddress } from 'viem';
 
 function validateInput(type: string, value: string): boolean {

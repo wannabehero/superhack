@@ -55,7 +55,7 @@ export async function retrieveAll(): Promise<Shortcut[]> {
   return Promise.all(templatesData.map(buildShortcut));
 }
 
-export async function localShortcuts(): Promise<Shortcut[]> {
+export async function loadLocalShortcuts(): Promise<Shortcut[]> {
   const localTemplates = local.retrieve();
   return await Promise.all(
     localTemplates.map(async (item) => {
@@ -108,3 +108,5 @@ async function buildShortcut(record: TemplateRecord): Promise<Shortcut> {
     actions: JSON.parse(payload),
   };
 }
+
+export * from './types';

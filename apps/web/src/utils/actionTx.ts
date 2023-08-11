@@ -1,5 +1,5 @@
 import { Address, encodeFunctionData } from 'viem';
-import { Action } from '../types/shortcut';
+import { Action } from 'libs';
 
 export function prepareTxData({ contract, func, inputs }: Action): { to: Address; data: Address } {
   const data = encodeFunctionData({

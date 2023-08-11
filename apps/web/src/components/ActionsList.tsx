@@ -1,5 +1,5 @@
 import { Card, CardBody, Flex, Text, VStack } from '@chakra-ui/react';
-import { Action } from '../types/shortcut';
+import { Action } from 'libs';
 import { formatABIItem } from '../utils/abi';
 
 interface ActionsListProps {

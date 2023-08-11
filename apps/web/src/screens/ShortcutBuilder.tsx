@@ -19,15 +19,14 @@ import { useMemo, useState } from 'react';
 
 import ActionBuilder from './ActionBuilder';
 import { CHAINS } from '../web3/consts';
-import { Action, Shortcut } from '../types/shortcut';
+import { Action, Shortcut } from 'libs';
 import ActionsList from '../components/ActionsList';
 
 interface ShortcutBuilderProps {
   onPublish: (shortcut: Shortcut) => void;
-  onRun: (shortcut: Shortcut) => void;
 }
 
-const ShortcutBuilder = ({ onPublish, onRun }: ShortcutBuilderProps) => {
+const ShortcutBuilder = ({ onPublish }: ShortcutBuilderProps) => {
   const [name, setName] = useState<string>('');
   const [chainId, setChainId] = useState<number>(CHAINS[0].id);
   const [actions, setActions] = useState<Action[]>([]);
@@ -82,13 +81,6 @@ const ShortcutBuilder = ({ onPublish, onRun }: ShortcutBuilderProps) => {
           onClick={() => onPublish({ name, chainId, actions })}
         >
           Publish
-        </Button>
-        <Button
-          colorScheme="pink"
-          isDisabled={!isPublishButtonEnabled}
-          onClick={() => onRun({ name, chainId, actions })}
-        >
-          Run
         </Button>
       </VStack>
       <Modal isOpen={isAddActionModalOpen} size="xl" onClose={() => setIsAddActionModalOpen(false)}>

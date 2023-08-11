@@ -7,7 +7,7 @@ import {
   useWalletClient,
 } from 'wagmi';
 import useSafes from '../hooks/useSafes';
-import { Shortcut } from '../types/shortcut';
+import { Shortcut } from 'libs';
 import { Button, FormControl, FormLabel, Select, Text, VStack, useToast } from '@chakra-ui/react';
 import { useMemo, useState } from 'react';
 import { loadSafe, useEthersAdapter, useSafeService } from '../web3/safe';

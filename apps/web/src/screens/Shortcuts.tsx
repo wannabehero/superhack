@@ -16,31 +16,38 @@ import {
   DrawerCloseButton,
   DrawerHeader,
   DrawerBody,
+  useToast,
+  Card,
+  CardBody,
+  Flex,
 } from '@chakra-ui/react';
 import { useState } from 'react';
 import ShortcutBuilder from './ShortcutBuilder';
-import { Shortcut } from '../types/shortcut';
 
-import { localShortcuts, publish } from 'libs/src/shortcut';
+import { Shortcut, publish } from 'libs';
 import ShortcutRunner from './ShortcutRunner';
 import { useChainId } from 'wagmi';
 import { useEthersSigner } from '../web3/ethersViem';
+import useShortcuts from '../hooks/useShortcuts';
 
 const Shortcuts = () => {
+  const toast = useToast();
   const [isCreateShortcutModalOpen, setIsCreateShortcutModalOpen] = useState(false);
   const [runningShortcut, setRunningShortcut] = useState<Shortcut>();
   const chainId = useChainId();
   const signer = useEthersSigner({ chainId });
-  if (!signer) {
-    return;
-  }
-
-  const onLocal = async () => {
-    console.log(await localShortcuts());
-  };
+  const { shortcuts, fetchShortcuts } = useShortcuts();
 
   const onPublish = async (shortcut: Shortcut) => {
+    if (!signer) {
+      toast({
+        title: 'No wallet connected',
+        status: 'error',
+      });
+      return;
+    }
     await publish(signer, shortcut);
+    fetchShortcuts();
   };
 
   const onRun = (shortcut: Shortcut) => {
@@ -62,11 +69,22 @@ const Shortcuts = () => {
           >
             Create new
           </Button>
-          <Button rounded="xl" colorScheme="green" onClick={() => onLocal()}>
-            Log Local shortcuts
-          </Button>
         </HStack>
-        <VStack></VStack>
+        <VStack alignItems="stretch">
+          {!!shortcuts &&
+            shortcuts.map((shortcut, idx) => (
+              <Card key={`shortcut-${idx}`} variant="outline">
+                <CardBody>
+                  <Flex align="center">
+                    <Text>{shortcut.name}</Text>
+                    <Button colorScheme="red" onClick={() => onRun(shortcut)}>
+                      Run
+                    </Button>
+                  </Flex>
+                </CardBody>
+              </Card>
+            ))}
+        </VStack>
       </VStack>
       <Modal
         isOpen={isCreateShortcutModalOpen}
@@ -78,7 +96,7 @@ const Shortcuts = () => {
           <ModalHeader>Create Shortcut</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
-            <ShortcutBuilder onPublish={onPublish} onRun={onRun} />
+            <ShortcutBuilder onPublish={onPublish} />
           </ModalBody>
         </ModalContent>
       </Modal>
