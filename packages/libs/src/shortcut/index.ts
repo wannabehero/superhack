@@ -2,9 +2,10 @@ import { Signer } from "ethers";
 import { eas } from "..";
 import { ipfs } from "../storage";
 import { local } from "../storage";
-import { Shortcut } from "./types";
+import { Action, Shortcut } from "./types";
 import { CountUpvotes, GetTemplate } from "../eas/gql";
 import { templateSchema } from "../eas";
+import { simulateTx } from "../tenderly";
 
 export async function publish(signer: Signer, shortcut: Shortcut): Promise<Shortcut> {
   const actions = JSON.stringify(shortcut.actions);
@@ -86,6 +87,18 @@ export async function upvoteCount(shortcut: Shortcut): Promise<number> {
   return await CountUpvotes(params);
 }
 
-export async function simulate(shortcut: Shortcut): Promise<any> {
-  // tenderly call 
+export async function simulate(signer: Signer, action: Action, chainId: number): Promise<any> {
+  return await simulateTx({
+    contract: {
+      abi: [action.func], 
+      contractAddress: action.contract, 
+      provider: signer,
+      funcName: action.func.name!, 
+      args: Object.values(action.inputs),
+    },
+    type: 'quick',
+    sender: await signer.getAddress(),
+    network_id: chainId.toString(),
+    value: 0.0,
+  })
 }

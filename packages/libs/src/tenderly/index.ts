@@ -6,7 +6,7 @@ const apiURL = `https://api.tenderly.co/api/v1/account/yabalaban/project/superha
 
 export async function simulateTx(p: TenderlyParams): Promise<any> {
   const contract = new ethers.Contract(p.contract.contractAddress, p.contract.abi, p.contract.provider);
-  const unsignedTx = await contract.populateTransaction[p.contract.funcName](p.contract.args);
+  const unsignedTx = await contract.populateTransaction[p.contract.funcName](...p.contract.args);
   const body = JSON.stringify({
     save: true,
     "save_if_fails": true,
@@ -15,7 +15,7 @@ export async function simulateTx(p: TenderlyParams): Promise<any> {
     "from": p.sender,
     "to": contract.address,
     "input": unsignedTx.data,
-    "gas": 21204,
+    "gas": 100000,
     "gas_price": "0",
     "value": p.value,
   });
