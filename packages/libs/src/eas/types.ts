@@ -13,3 +13,8 @@ export interface Template extends Itemable {
 export interface TemplateUpvote extends Itemable {
   template_id: string;
 }
+
+export interface TemplateRecord {
+  id: string;
+  data: string;
+}

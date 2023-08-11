@@ -1,6 +1,6 @@
 import { providers, ethers } from 'ethers';
 import { Constant, TestConstant } from '../src/constant/index';
-import { localShortcuts, publish, retrieve, simulate, upvote, upvoteCount } from '../src/shortcut';
+import { localShortcuts, publish, retrieve, retrieveAll, simulate, upvote, upvoteCount } from '../src/shortcut';
 import { ABIItem } from '../src/etherscan';
 
 const provider = new providers.JsonRpcProvider(Constant.easProviderUri);
@@ -73,8 +73,11 @@ const provider = new providers.JsonRpcProvider(Constant.easProviderUri);
   // const id = await store(contractABI);
   // console.log(await retrieve(toHex('bafybeiajff5yrw46jf2ot7i5yvfzixzhw3w2bmfuvrjcwylceyzsjejd4a')));
 
-  const shortcut = await retrieve('0xd9303087990f4c65a0d5fd569e87aa13d5c888a0e8c2754b2f6038357af975e4');
-  console.log(shortcut.actions[0]);
-  const res = await simulate(wallet, shortcut.actions[0], shortcut.chainId);
-  console.log(res);
+  // const shortcut = await retrieve('0xd9303087990f4c65a0d5fd569e87aa13d5c888a0e8c2754b2f6038357af975e4');
+  // console.log(shortcut.actions[0]);
+  // const res = await simulate(wallet, shortcut.actions[0], shortcut.chainId);
+  // console.log(res);
+
+  const shortcuts = await retrieveAll();
+  console.log(shortcuts);
 })();

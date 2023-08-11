@@ -2850,19 +2850,19 @@ export type TimestampWhereUniqueInput = {
   id?: InputMaybe<Scalars['String']['input']>;
 };
 
-export type AttestationQueryVariables = Exact<{
-  where?: InputMaybe<AttestationWhereInput>;
-}>;
-
-
-export type AttestationQuery = { __typename?: 'Query', attestations: Array<{ __typename?: 'Attestation', id: string, isOffchain: boolean }> };
-
 export type GetTemplateQueryVariables = Exact<{
   where: AttestationWhereUniqueInput;
 }>;
 
 
 export type GetTemplateQuery = { __typename?: 'Query', attestation?: { __typename?: 'Attestation', data: string } | null };
+
+export type GetAllTemplatesQueryVariables = Exact<{
+  where?: InputMaybe<AttestationWhereInput>;
+}>;
+
+
+export type GetAllTemplatesQuery = { __typename?: 'Query', attestations: Array<{ __typename?: 'Attestation', id: string, data: string }> };
 
 export type CountUpvotesQueryVariables = Exact<{
   where?: InputMaybe<AttestationWhereInput>;
@@ -2872,6 +2872,6 @@ export type CountUpvotesQueryVariables = Exact<{
 export type CountUpvotesQuery = { __typename?: 'Query', aggregateAttestation: { __typename?: 'AggregateAttestation', _count?: { __typename?: 'AttestationCountAggregate', _all: number } | null } };
 
 
-export const AttestationDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"Attestation"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"where"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"AttestationWhereInput"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"attestations"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"where"},"value":{"kind":"Variable","name":{"kind":"Name","value":"where"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"isOffchain"}}]}}]}}]} as unknown as DocumentNode<AttestationQuery, AttestationQueryVariables>;
 export const GetTemplateDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetTemplate"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"where"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"AttestationWhereUniqueInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"attestation"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"where"},"value":{"kind":"Variable","name":{"kind":"Name","value":"where"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"data"}}]}}]}}]} as unknown as DocumentNode<GetTemplateQuery, GetTemplateQueryVariables>;
+export const GetAllTemplatesDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetAllTemplates"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"where"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"AttestationWhereInput"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"attestations"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"where"},"value":{"kind":"Variable","name":{"kind":"Name","value":"where"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"data"}}]}}]}}]} as unknown as DocumentNode<GetAllTemplatesQuery, GetAllTemplatesQueryVariables>;
 export const CountUpvotesDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"CountUpvotes"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"where"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"AttestationWhereInput"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"aggregateAttestation"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"where"},"value":{"kind":"Variable","name":{"kind":"Name","value":"where"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"_count"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"_all"}}]}}]}}]}}]} as unknown as DocumentNode<CountUpvotesQuery, CountUpvotesQueryVariables>;

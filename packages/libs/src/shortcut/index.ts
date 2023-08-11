@@ -3,9 +3,10 @@ import { eas } from "..";
 import { ipfs } from "../storage";
 import { local } from "../storage";
 import { Action, Shortcut } from "./types";
-import { CountUpvotes, GetTemplate } from "../eas/gql";
+import { CountUpvotes, GetAllTemplates, GetTemplate } from "../eas/gql";
 import { templateSchema } from "../eas";
 import { simulateTx } from "../tenderly";
+import { Template, TemplateRecord } from "../eas/types";
 
 export async function publish(signer: Signer, shortcut: Shortcut): Promise<Shortcut> {
   const actions = JSON.stringify(shortcut.actions);
@@ -48,18 +49,14 @@ export async function retrieve(easId: string): Promise<Shortcut> {
   if (!templateData) {
     throw Error(`oops, no template for 'easId' = ${easId} found`);
   }
-  const items = templateSchema.decodeData(templateData);
-  var template: Record<string, any> = {}; 
-  items.forEach(item => {
-    template[item.name] = item.value;
-  });
-  const payload = await ipfs.retrieve(template.ipfs_id.value);
-  return {
-    easId: easId,
-    name: template.name.value, 
-    chainId: template.chain_id.value,
-    actions: JSON.parse(payload),
-  }
+  return await buildShortcut({ id: easId, data: templateData});
+}
+
+export async function retrieveAll(): Promise<Shortcut[]> {
+  const templatesData = await GetAllTemplates();
+  return Promise.all(
+    templatesData.map(buildShortcut)
+  );
 }
 
 export async function localShortcuts(): Promise<Shortcut[]> {
@@ -101,4 +98,19 @@ export async function simulate(signer: Signer, action: Action, chainId: number):
     network_id: chainId.toString(),
     value: 0.0,
   })
+}
+
+async function buildShortcut(record: TemplateRecord): Promise<Shortcut> {
+  const items = templateSchema.decodeData(record.data);
+  var template: Record<string, any> = {}; 
+  items.forEach(item => {
+    template[item.name] = item.value;
+  });
+  const payload = await ipfs.retrieve(template.ipfs_id.value);
+  return {
+    easId: record.id,
+    name: template.name.value, 
+    chainId: template.chain_id.value,
+    actions: JSON.parse(payload),
+  }
 }

@@ -2,8 +2,9 @@ import { ApolloClient, InMemoryCache } from '@apollo/client';
 import { Constant } from '../constant/index';
 
 import { gql } from '../__generated__/gql';
-import { templateUpvoteSchema } from '.';
+import { templateSchema, templateUpvoteSchema } from '.';
 import { SchemaItem } from '@ethereum-attestation-service/eas-sdk';
+import { TemplateRecord } from './types';
 
 const apolloClient = new ApolloClient({
   uri: Constant.apolloClientUri,
@@ -13,6 +14,15 @@ const apolloClient = new ApolloClient({
 const GET_TEMPLATE = gql(`
 query GetTemplate($where: AttestationWhereUniqueInput!) {
   attestation(where: $where) {
+    data
+  }
+}
+`);
+
+const GET_ALL_TEMPLATES = gql(`
+query GetAllTemplates($where: AttestationWhereInput) {
+  attestations(where: $where) {
+    id
     data
   }
 }
@@ -46,4 +56,12 @@ export async function GetTemplate(easId: string): Promise<string | undefined> {
     variables: { where: { id: easId } },
   });
   return response.data.attestation?.data;
+}
+
+export async function GetAllTemplates(): Promise<TemplateRecord[]> {
+  const response = await apolloClient.query({
+    query: GET_ALL_TEMPLATES,
+    variables: { where: { schemaId: { equals: templateSchema.uid } } }, 
+  });
+  return response.data.attestations.flatMap(item => ({id: item.id, data: item.data}));
 }
