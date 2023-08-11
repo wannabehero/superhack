@@ -40,11 +40,11 @@ query CountUpvotes($where: AttestationWhereInput) {
 export async function CountUpvotes(items: SchemaItem[]): Promise<number> {
   const response = await apolloClient.query({
     query: COUNT_UPVOTES,
-    variables: { 
-      where: { 
+    variables: {
+      where: {
         schemaId: { equals: templateUpvoteSchema.uid },
         data: { equals: templateUpvoteSchema.encodeData(items) },
-      } 
+      },
     },
   });
   return response.data.aggregateAttestation._count?._all ?? 0;
@@ -61,7 +61,7 @@ export async function GetTemplate(easId: string): Promise<string | undefined> {
 export async function GetAllTemplates(): Promise<TemplateRecord[]> {
   const response = await apolloClient.query({
     query: GET_ALL_TEMPLATES,
-    variables: { where: { schemaId: { equals: templateSchema.uid } } }, 
+    variables: { where: { schemaId: { equals: templateSchema.uid } } },
   });
-  return response.data.attestations.flatMap(item => ({id: item.id, data: item.data}));
+  return response.data.attestations.flatMap((item) => ({ id: item.id, data: item.data }));
 }

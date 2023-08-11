@@ -40,7 +40,7 @@ const Shortcuts = () => {
   };
 
   const onPublish = async (shortcut: Shortcut) => {
-    return await publish(signer, shortcut);
+    await publish(signer, shortcut);
   };
 
   const onRun = (shortcut: Shortcut) => {
@@ -62,11 +62,7 @@ const Shortcuts = () => {
           >
             Create new
           </Button>
-          <Button
-            rounded="xl"
-            colorScheme="green"
-            onClick={() => onLocal()}
-          >
+          <Button rounded="xl" colorScheme="green" onClick={() => onLocal()}>
             Log Local shortcuts
           </Button>
         </HStack>

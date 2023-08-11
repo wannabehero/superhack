@@ -19,15 +19,12 @@ export async function store(object: unknown): Promise<Address> {
 export async function retrieve(cidHex: Address) {
   const cid = fromHex(cidHex, 'string');
   const res = await client.get(cid);
-  // @ts-expect-error
-  console.log(`Got a response! [${res.status}] ${res.statusText}`)
-  // @ts-expect-error
-  if (!res.ok) {
-    throw new Error(`failed to get ${cid}`)
+  console.log(`Got a response! [${res?.status}] ${res?.statusText}`);
+  if (!res || !res.ok) {
+    throw new Error(`failed to get ${cid}`);
   }
 
   // unpack File objects from the response
-  // @ts-expect-error
-  const files = await res.files()
+  const files = await res.files();
   return JSON.parse(Buffer.from(await files[0].arrayBuffer()).toString('utf-8'));
 }

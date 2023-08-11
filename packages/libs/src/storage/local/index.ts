@@ -1,4 +1,4 @@
-import { LocalTemplate } from "./types"
+import { LocalTemplate } from './types';
 
 const LOCAL_FILE_NAME = 'super_local_storage_3000';
 

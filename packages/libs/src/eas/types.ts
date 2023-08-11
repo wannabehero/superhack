@@ -1,4 +1,4 @@
-import { SchemaItem } from "@ethereum-attestation-service/eas-sdk";
+import { SchemaItem } from '@ethereum-attestation-service/eas-sdk';
 
 export interface Itemable {
   items(): SchemaItem[];

@@ -1,14 +1,8 @@
 import { providers, ethers } from 'ethers';
 import { Constant } from '../constant/index';
-import {
-  EAS,
-  SchemaEncoder,
-  SchemaItem,
-} from '@ethereum-attestation-service/eas-sdk';
+import { EAS, SchemaEncoder, SchemaItem } from '@ethereum-attestation-service/eas-sdk';
 
-const provider = new providers.JsonRpcProvider(
-  Constant.easProvider
-);
+const provider = new providers.JsonRpcProvider(Constant.easProvider);
 
 class EASClient {
   private eas: EAS;
@@ -41,7 +35,7 @@ class EASClient {
         expirationTime: BigInt(0),
         revocable: false,
         data: encodedData,
-      }
+      },
     });
     return await tx.wait();
   }
