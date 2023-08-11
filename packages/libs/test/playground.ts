@@ -2,6 +2,7 @@ import { providers, ethers } from 'ethers';
 import { Constant, TestConstant } from '../src/constant/index';
 import { localShortcuts, publish, retrieve, retrieveAll, simulate, upvote, upvoteCount } from '../src/shortcut';
 import { ABIItem } from '../src/etherscan';
+import { eas } from '../src';
 
 const provider = new providers.JsonRpcProvider(
   Constant.easProvider
@@ -9,30 +10,41 @@ const provider = new providers.JsonRpcProvider(
 
 (async () => {
   const key = TestConstant.privateKey;
+  // const wallet = new ethers.Wallet(key, provider);
+
+  // const contractABI: ABIItem = {
+  //   "inputs": [
+  //     {
+  //       "internalType": "uint256",
+  //       "name": "num",
+  //       "type": "uint256"
+  //     }
+  //   ],
+  //   "name": "store",
+  //   "outputs": [],
+  //   "stateMutability": "nonpayable",
+  //   "type": "function"
+  // };
+
+  // const shortcut = await publish(wallet, {
+  //   name: 'test',
+  //   chainId: 321,
+  //   actions: [
+  //     { contract: '0x123456', func: contractABI, inputs: {} }
+  //   ]
+  // });
+  // console.log(shortcut);
+
   const wallet = new ethers.Wallet(key, provider);
+  const params = [
+    { name: 'name', value: "shortcut.name", type: 'string' },
+    { name: 'chain_id', value: 123, type: 'uint32' },
+    { name: 'ipfs_id', value: "ipfsId", type: 'string' },
+  ]
+  // onchain attestation for new template
+  const easId = await eas.client.publish(wallet, params);
 
-  const contractABI: ABIItem = {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "num",
-        "type": "uint256"
-      }
-    ],
-    "name": "store",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  };
 
-  const shortcut = await publish(wallet, {
-    name: 'test',
-    chainId: 321,
-    actions: [
-      { contract: '0x123456', func: contractABI, inputs: {} }
-    ]
-  });
-  console.log(shortcut);
   // console.log(await localShortcuts())
 
   // console.log(await upvoteCount({

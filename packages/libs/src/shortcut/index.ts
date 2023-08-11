@@ -93,7 +93,7 @@ export async function simulate(signer: Signer, action: Action, chainId: number):
       funcName: action.func.name!, 
       args: Object.values(action.inputs),
     },
-    type: 'quick',
+    type: 'full',
     sender: await signer.getAddress(),
     network_id: chainId.toString(),
     value: 0.0,
