@@ -14,6 +14,8 @@ import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/
  */
 const documents = {
     "\n    query Attestation($where: AttestationWhereInput) {\n        attestations(where: $where) {\n            id\n            isOffchain\n        }\n    }\n": types.AttestationDocument,
+    "\nquery GetTemplate($where: AttestationWhereUniqueInput!) {\n  attestation(where: $where) {\n    data\n  }\n}\n": types.GetTemplateDocument,
+    "\nquery CountUpvotes($where: AttestationWhereInput) {\n  aggregateAttestation(where: $where) {\n    _count {\n      _all\n    }\n  }\n}": types.CountUpvotesDocument,
 };
 
 /**
@@ -34,6 +36,14 @@ export function gql(source: string): unknown;
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function gql(source: "\n    query Attestation($where: AttestationWhereInput) {\n        attestations(where: $where) {\n            id\n            isOffchain\n        }\n    }\n"): (typeof documents)["\n    query Attestation($where: AttestationWhereInput) {\n        attestations(where: $where) {\n            id\n            isOffchain\n        }\n    }\n"];
+/**
+ * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function gql(source: "\nquery GetTemplate($where: AttestationWhereUniqueInput!) {\n  attestation(where: $where) {\n    data\n  }\n}\n"): (typeof documents)["\nquery GetTemplate($where: AttestationWhereUniqueInput!) {\n  attestation(where: $where) {\n    data\n  }\n}\n"];
+/**
+ * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function gql(source: "\nquery CountUpvotes($where: AttestationWhereInput) {\n  aggregateAttestation(where: $where) {\n    _count {\n      _all\n    }\n  }\n}"): (typeof documents)["\nquery CountUpvotes($where: AttestationWhereInput) {\n  aggregateAttestation(where: $where) {\n    _count {\n      _all\n    }\n  }\n}"];
 
 export function gql(source: string) {
   return (documents as any)[source] ?? {};

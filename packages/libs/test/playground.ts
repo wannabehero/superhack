@@ -1,16 +1,51 @@
 import { Address, fromHex, toHex } from 'viem';
 import { providers, ethers } from 'ethers';
 import { client } from '../src/eas/index';
-import { GetAttestations } from '../src/eas/gql';
-import { Constant } from '../src/constant/index';
+import { Constant, TestConstant } from '../src/constant/index';
 import { simulateTx } from '../src/tenderly/index';
-import { store, retrieve } from '../src/ipfs/index';
+import { localShortcuts, publish, retrieve, upvote, upvoteCount } from '../src/shortcut';
+import { ABIItem } from '../src/etherscan';
 
 const provider = new providers.JsonRpcProvider(Constant.easProviderUri);
 
 (async () => {
-  // const key = TestConstant.privateKey;
-  // const wallet = new ethers.Wallet(key, provider);
+  const key = TestConstant.privateKey;
+  const wallet = new ethers.Wallet(key, provider);
+
+  const contractABI: ABIItem = {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "num",
+        "type": "uint256"
+      }
+    ],
+    "name": "store",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  };
+
+  // const shortcut = await publish(wallet, {
+  //   name: 'test',
+  //   chainId: 123,
+  //   actions: [
+  //     { contract: '0x1234', func: contractABI, inputs: {} }
+  //   ]
+  // });
+  // console.log(shortcut);
+  // console.log(await localShortcuts())
+
+  // console.log(await upvoteCount({
+  //   eas_id: '0x0a1419d62c96a4abb4eedd5db6e7dddc75287c8513f37db2d5e39f24fa75c913',
+  //   name: 'test',
+  //   chainId: 123,
+  //   actions: [
+  //     { contract: '0x1234', func: contractABI, inputs: {} }
+  //   ]
+  // }));
+
+  console.log(await retrieve('0x0a1419d62c96a4abb4eedd5db6e7dddc75287c8513f37db2d5e39f24fa75c913'));
 
   // const uid = await client.createTempateStatsAttestation(wallet, [
   //   { name: 'blob', value: ['0x21', '0x30'], type: 'bytes[]' },
@@ -23,37 +58,9 @@ const provider = new providers.JsonRpcProvider(Constant.easProviderUri);
   // );
   // console.log(data);
 
-  const contractABI = [
-    {
-      "inputs": [
-        {
-          "internalType": "uint256",
-          "name": "num",
-          "type": "uint256"
-        }
-      ],
-      "name": "store",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "retrieve",
-      "outputs": [
-        {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    }
-  ]
-  const id = await store(contractABI);
-  console.log(await retrieve(toHex('bafybeiajff5yrw46jf2ot7i5yvfzixzhw3w2bmfuvrjcwylceyzsjejd4a')));
-
+  // const id = await store(contractABI);
+  // console.log(await retrieve(toHex('bafybeiajff5yrw46jf2ot7i5yvfzixzhw3w2bmfuvrjcwylceyzsjejd4a')));
+// 
   // const tx = await simulateTx({
   //   contract: {
   //     abi: contractABI,

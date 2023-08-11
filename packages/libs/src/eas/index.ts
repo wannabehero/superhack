@@ -19,12 +19,12 @@ class EASClient {
     this.eas = eas;
   }
 
-  async publish(signer: ethers.Signer, template: Template): Promise<string> {
-    return await this.createAttestation(signer, template.items(), templateSchema);
+  async publish(signer: ethers.Signer, params: SchemaItem[]): Promise<string> {
+    return await this.createAttestation(signer, params, templateSchema);
   }
 
-  async upvote(signer: ethers.Signer, templateUpvote: TemplateUpvote): Promise<string> {
-    return await this.createAttestation(signer, templateUpvote.items(), templateUpvoteSchema);
+  async upvote(signer: ethers.Signer, params: SchemaItem[]): Promise<string> {
+    return await this.createAttestation(signer, params, templateUpvoteSchema);
   }
 
   private async createAttestation(
@@ -37,15 +37,12 @@ class EASClient {
     const tx = await this.eas.attest({
       schema: schema.uid,
       data: {
-        recipient: '0x9799c803E4D9e278603872922A24846FbB9B924D',
+        recipient: '0xe98bA1B3801d105Ee7C8611E34D9048985b2EFA1',
         expirationTime: BigInt(0),
         revocable: false,
         data: encodedData,
       }
-    }, {
-      gasLimit: 1000000000,
-    }
-    );
+    });
     return await tx.wait();
   }
 }
@@ -62,11 +59,11 @@ class SchemaDefinition extends SchemaEncoder {
   }
 }
 
-const templateSchema = new SchemaDefinition(
+export const templateSchema = new SchemaDefinition(
   '0x3241293e9d8ffba33b19091ee6235b62949848348ec423856cbb59a93ef8a438',
   'string name, uint32 chain_id, string ipfs_id',
 );
-const templateUpvoteSchema = new SchemaDefinition(
+export const templateUpvoteSchema = new SchemaDefinition(
   '0x6407330affce7ce561a90b2bd380911c1e64becd8fa3ebeccd84aaee01fc292a',
   'string template_id',
 );
