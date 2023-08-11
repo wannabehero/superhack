@@ -1,0 +1,17 @@
+{
+    "short_name": "Shortcuts",
+    "name": "Shortcuts",
+    "description": "Turn your onchain actions into Shortcuts",
+    "icons": [
+      {
+        "src": "vite.svg",
+        "sizes": "any",
+        "type": "image/svg+xml"
+      }
+    ],
+    "start_url": ".",
+    "display": "standalone",
+    "theme_color": "#000000",
+    "background_color": "#FFFFFF",
+    "iconPath": "./vite.svg"
+  }

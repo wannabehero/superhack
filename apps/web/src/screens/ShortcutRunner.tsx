@@ -1,4 +1,11 @@
-import { Address, useAccount, useChainId, usePublicClient, useWalletClient } from 'wagmi';
+import {
+  Address,
+  WalletClient,
+  useAccount,
+  useChainId,
+  usePublicClient,
+  useWalletClient,
+} from 'wagmi';
 import useSafes from '../hooks/useSafes';
 import { Shortcut } from '../types/shortcut';
 import { Button, FormControl, FormLabel, Select, Text, VStack, useToast } from '@chakra-ui/react';
@@ -8,9 +15,60 @@ import Safe from '@safe-global/protocol-kit';
 import { MetaTransactionData, OperationType } from '@safe-global/safe-core-sdk-types';
 import { prepareTxData } from '../utils/actionTx';
 import ActionsList from '../components/ActionsList';
+import SafeProvider, { useSafeAppsSDK } from '@safe-global/safe-apps-react-sdk';
+import SafeApiKit from '@safe-global/api-kit';
+import SafeAppsSDK, { BaseTransaction } from '@safe-global/safe-apps-sdk';
 
 interface ShortcutRunnerProps {
   shortcut: Shortcut;
+}
+
+async function executeWithControllerSafe({
+  shortcut,
+  selectedSafe,
+  walletClient,
+  safeService,
+}: {
+  shortcut: Shortcut;
+  selectedSafe: Safe;
+  walletClient: WalletClient;
+  safeService: SafeApiKit;
+}): Promise<string> {
+  const data: MetaTransactionData[] = shortcut.actions.map((action) => ({
+    value: '0',
+    operation: OperationType.Call,
+    ...prepareTxData(action),
+  }));
+  const safeTx = await selectedSafe.createTransaction({ safeTransactionData: data });
+  const safeTxHash = await selectedSafe.getTransactionHash(safeTx);
+  const { data: senderSignature } = await selectedSafe.signTransactionHash(safeTxHash);
+
+  await safeService.proposeTransaction({
+    safeTxHash,
+    senderSignature,
+    safeAddress: await selectedSafe.getAddress(),
+    safeTransactionData: safeTx.data,
+    senderAddress: walletClient.account.address,
+  });
+
+  return safeTxHash;
+}
+
+async function executeWithIndependedSafe({
+  shortcut,
+  sdk,
+}: {
+  shortcut: Shortcut;
+  sdk: SafeAppsSDK;
+}) {
+  // we are inside a Safe App
+  const txs: BaseTransaction[] = shortcut.actions.map((action) => ({
+    value: '0',
+    ...prepareTxData(action),
+  }));
+  // Returns a hash to identify the Safe transaction
+  const { safeTxHash } = await sdk.txs.send({ txs });
+  return safeTxHash;
 }
 
 const ShortcutRunner = ({ shortcut }: ShortcutRunnerProps) => {
@@ -27,8 +85,9 @@ const ShortcutRunner = ({ shortcut }: ShortcutRunnerProps) => {
   const safeService = useSafeService({ chainId });
 
   const [isLoading, setIsLoading] = useState(false);
-  const [isExecuting, setIsExecuting] = useState(false);
   const isEOA = useMemo(() => !executor || !safes || !safes.includes(executor), [safes, executor]);
+
+  const safeApp = useSafeAppsSDK();
 
   const onExecute = async () => {
     if (!walletClient || !ethAdapter) {
@@ -71,21 +130,21 @@ const ShortcutRunner = ({ shortcut }: ShortcutRunnerProps) => {
           throw new Error('No Safe service');
         }
 
-        const data: MetaTransactionData[] = shortcut.actions.map((action) => ({
-          value: '0',
-          operation: OperationType.Call,
-          ...prepareTxData(action),
-        }));
-        const safeTx = await selectedSafe.createTransaction({ safeTransactionData: data });
-        const safeTxHash = await selectedSafe.getTransactionHash(safeTx);
-        const { data: senderSignature } = await selectedSafe.signTransactionHash(safeTxHash);
-
-        await safeService.proposeTransaction({
-          safeTxHash,
-          senderSignature,
-          safeAddress: await selectedSafe.getAddress(),
-          safeTransactionData: safeTx.data,
-          senderAddress: walletClient.account.address,
+        const safeTxHash = await executeWithControllerSafe({
+          shortcut,
+          selectedSafe,
+          walletClient,
+          safeService,
+        });
+        toast({
+          title: 'Transaction proposed',
+          description: safeTxHash,
+          status: 'success',
+        });
+      } else if (safeApp.connected && safeApp.safe.safeAddress.length > 0) {
+        const safeTxHash = await executeWithIndependedSafe({
+          shortcut,
+          sdk: safeApp.sdk,
         });
         toast({
           title: 'Transaction proposed',
@@ -101,13 +160,14 @@ const ShortcutRunner = ({ shortcut }: ShortcutRunnerProps) => {
         // TODO: extract this
         const txHash = await walletClient.sendTransaction({
           ...prepareTxData(action),
+          value: 0n,
         });
         await publicClient.waitForTransactionReceipt({
           hash: txHash,
           confirmations: 2,
         });
         toast({
-          title: 'Transaction confirmed',
+          title: 'Success!',
           status: 'success',
         });
       }
@@ -127,11 +187,11 @@ const ShortcutRunner = ({ shortcut }: ShortcutRunnerProps) => {
       <FormControl>
         <FormLabel>Executor</FormLabel>
         <Select
-          placeholder="EOA or Safe"
+          placeholder="Wallet or Safe"
           value={executor}
           onChange={(e) => setExecutor(e.target.value as Address)}
         >
-          <option value={address}>Wallet: {address}</option>
+          <option value={address}>Current: {address}</option>
           {!!safes &&
             safes.map((safe) => (
               <option key={safe} value={safe}>
@@ -160,4 +220,10 @@ const ShortcutRunner = ({ shortcut }: ShortcutRunnerProps) => {
   );
 };
 
-export default ShortcutRunner;
+const WrappedRunner = (props: ShortcutRunnerProps) => (
+  <SafeProvider>
+    <ShortcutRunner {...props} />
+  </SafeProvider>
+);
+
+export default WrappedRunner;
