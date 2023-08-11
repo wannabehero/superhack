@@ -3,7 +3,9 @@ import { Constant, TestConstant } from '../src/constant/index';
 import { localShortcuts, publish, retrieve, retrieveAll, simulate, upvote, upvoteCount } from '../src/shortcut';
 import { ABIItem } from '../src/etherscan';
 
-const provider = new providers.JsonRpcProvider(Constant.easProviderUri);
+const provider = new providers.JsonRpcProvider(
+  Constant.easProvider
+);
 
 (async () => {
   const key = TestConstant.privateKey;
@@ -23,18 +25,18 @@ const provider = new providers.JsonRpcProvider(Constant.easProviderUri);
     "type": "function"
   };
 
-  // const shortcut = await publish(wallet, {
-  //   name: 'test',
-  //   chainId: 123,
-  //   actions: [
-  //     { contract: '0x1234', func: contractABI, inputs: {} }
-  //   ]
-  // });
-  // console.log(shortcut);
+  const shortcut = await publish(wallet, {
+    name: 'test',
+    chainId: 321,
+    actions: [
+      { contract: '0x123456', func: contractABI, inputs: {} }
+    ]
+  });
+  console.log(shortcut);
   // console.log(await localShortcuts())
 
   // console.log(await upvoteCount({
-  //   eas_id: '0x0a1419d62c96a4abb4eedd5db6e7dddc75287c8513f37db2d5e39f24fa75c913',
+  //   easId: '0xe1e9099a2cae72dd6aa84dc5213c0b29ad408e942b703ce6e1cbb8a2f7d78303',
   //   name: 'test',
   //   chainId: 123,
   //   actions: [
@@ -78,6 +80,6 @@ const provider = new providers.JsonRpcProvider(Constant.easProviderUri);
   // const res = await simulate(wallet, shortcut.actions[0], shortcut.chainId);
   // console.log(res);
 
-  const shortcuts = await retrieveAll();
-  console.log(shortcuts);
+  // const shortcuts = await retrieveAll();
+  // console.log(shortcuts);
 })();

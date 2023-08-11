@@ -5,16 +5,16 @@ import {
   SchemaEncoder,
   SchemaItem,
 } from '@ethereum-attestation-service/eas-sdk';
-import { Template, TemplateUpvote } from './types';
 
-export const EASContractAddress = '0xC2679fBD37d54388Ce493F1DB75320D236e1815e'; // Sepolia v0.26
-const provider = new providers.JsonRpcProvider(Constant.easProviderUri);
+const provider = new providers.JsonRpcProvider(
+  Constant.easProvider
+);
 
 class EASClient {
   private eas: EAS;
 
   constructor() {
-    const eas = new EAS(EASContractAddress);
+    const eas = new EAS(Constant.easContractAddress);
     eas.connect(provider);
     this.eas = eas;
   }
@@ -37,7 +37,7 @@ class EASClient {
     const tx = await this.eas.attest({
       schema: schema.uid,
       data: {
-        recipient: '0xe98bA1B3801d105Ee7C8611E34D9048985b2EFA1',
+        recipient: '0x0000000000000000000000000000000000000000',
         expirationTime: BigInt(0),
         revocable: false,
         data: encodedData,

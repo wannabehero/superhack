@@ -1,7 +1,8 @@
 import { CodegenConfig } from '@graphql-codegen/cli';
+import { Constant } from './src/constant';
 
 const config: CodegenConfig = {
-  schema: 'https://sepolia.easscan.org/graphql',
+  schema: Constant.apolloClientUri,
   documents: ['src/**/*.ts'],
   generates: {
     './src/__generated__/': {
