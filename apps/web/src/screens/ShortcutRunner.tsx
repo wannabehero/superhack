@@ -7,11 +7,12 @@ import {
   useWalletClient,
 } from 'wagmi';
 import useSafes from '../hooks/useSafes';
-import { Action, Inputs, Shortcut } from 'libs';
+import { Action, Inputs, Shortcut, simulate } from 'libs';
 import {
   Button,
   FormControl,
   FormLabel,
+  HStack,
   Input,
   InputGroup,
   InputLeftAddon,
@@ -31,6 +32,7 @@ import SafeProvider, { useSafeAppsSDK } from '@safe-global/safe-apps-react-sdk';
 import SafeApiKit from '@safe-global/api-kit';
 import SafeAppsSDK, { BaseTransaction } from '@safe-global/safe-apps-sdk';
 import { validateInput } from '../utils/inputs';
+import { useEthersSigner } from '../web3/ethersViem';
 
 interface ShortcutRunnerProps {
   shortcut: Shortcut;
@@ -118,7 +120,9 @@ const ShortcutRunner = ({ shortcut, onDone }: ShortcutRunnerProps) => {
   const safeService = useSafeService({ chainId });
 
   const [isLoading, setIsLoading] = useState(false);
+  const [isSimulating, setIsSimulating] = useState(false);
   const isEOA = useMemo(() => !executor || !safes || !safes.includes(executor), [safes, executor]);
+  const signer = useEthersSigner({ chainId });
 
   const safeApp = useSafeAppsSDK();
 
@@ -133,6 +137,38 @@ const ShortcutRunner = ({ shortcut, onDone }: ShortcutRunnerProps) => {
       }, true),
     [shortcut, inputs],
   );
+
+  const onSimulate = async () => {
+    if (!signer) {
+      toast({
+        title: 'Cant create signer',
+        status: 'error',
+      });
+      return;
+    }
+
+    if (chainId !== shortcut.chainId) {
+      toast({
+        title: 'TODO: handle multichain shortcuts',
+        status: 'warning',
+      });
+      return;
+    }
+
+    if (!executor) {
+      toast({
+        title: 'No executor selected',
+        status: 'error',
+      });
+      return;
+    }
+
+    setIsSimulating(true);
+    const finalised = substituteInputsForShortcut(shortcut, inputs);
+    const links = await simulate(signer, finalised);
+    alert(links);
+    setIsSimulating(false);
+  }
 
   const onExecute = async () => {
     if (!walletClient || !ethAdapter) {
@@ -272,6 +308,7 @@ const ShortcutRunner = ({ shortcut, onDone }: ShortcutRunnerProps) => {
         </Text>
         <ActionsList actions={shortcut.actions} />
       </VStack>
+      <HStack>
       <Button
         colorScheme="red"
         onClick={onExecute}
@@ -282,6 +319,17 @@ const ShortcutRunner = ({ shortcut, onDone }: ShortcutRunnerProps) => {
       >
         {isEOA ? 'Execute' : 'Propose'}
       </Button>
+      <Button
+        colorScheme="green"
+        onClick={onSimulate}
+        isDisabled={!executor || !shortcut.actions.length || !isButtonEnabled}
+        alignSelf="flex-start"
+        px="32px"
+        isLoading={isSimulating}
+      >
+        Simulate
+      </Button>
+      </HStack>
     </VStack>
   );
 };

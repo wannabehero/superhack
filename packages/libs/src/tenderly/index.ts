@@ -3,7 +3,7 @@ import { TenderlyParams } from './types';
 
 const TENDERLY_ACCESS_KEY = process.env.TENDERLY_ACCESS_KEY!;
 const simulateURL = `https://api.tenderly.co/api/v1/account/yabalaban/project/superhack/simulate`;
-const shareURL = `https://api.tenderly.co/api/v1/account/yabalaban/project/superhack/simulations/`;
+const shareURL = `https://api.tenderly.co/api/v1/account/yabalaban/project/superhack/simulations`;
 
 export async function simulateTx(p: TenderlyParams): Promise<string> {
   const contract = new ethers.Contract(
