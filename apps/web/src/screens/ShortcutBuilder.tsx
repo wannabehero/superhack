@@ -21,15 +21,19 @@ import ActionBuilder from './ActionBuilder';
 import { CHAINS } from '../web3/consts';
 import { Action, Shortcut } from 'libs';
 import ActionsList from '../components/ActionsList';
+import { InputType } from '../utils/consts';
+import InputBuilder from '../components/InputBuilder';
 
 interface ShortcutBuilderProps {
+  isLoading: boolean;
   onPublish: (shortcut: Shortcut) => void;
 }
 
-const ShortcutBuilder = ({ onPublish }: ShortcutBuilderProps) => {
+const ShortcutBuilder = ({ onPublish, isLoading }: ShortcutBuilderProps) => {
   const [name, setName] = useState<string>('');
   const [chainId, setChainId] = useState<number>(CHAINS[0].id);
   const [actions, setActions] = useState<Action[]>([]);
+  const [inputs, setInputs] = useState<[string, InputType][]>([]);
   const [isAddActionModalOpen, setIsAddActionModalOpen] = useState(false);
 
   const isPublishButtonEnabled = useMemo(
@@ -60,25 +64,56 @@ const ShortcutBuilder = ({ onPublish }: ShortcutBuilderProps) => {
           </Select>
         </FormControl>
         {!!chainId && (
-          <VStack alignItems="stretch" py="8px">
-            <Text fontSize="l" fontWeight="medium">
-              Actions
-            </Text>
-            <ActionsList actions={actions} />
-            <Button
-              leftIcon={<AddIcon />}
-              onClick={() => setIsAddActionModalOpen(true)}
-              variant="ghost"
-              minHeight="50px"
-            >
-              Add Action
-            </Button>
-          </VStack>
+          <>
+            <VStack alignItems="stretch" py="8px">
+              <Text fontSize="l" fontWeight="medium">
+                Inputs
+              </Text>
+              {inputs.map(([name, type], idx) => (
+                <InputBuilder
+                  key={`input-${idx}`}
+                  name={name}
+                  type={type}
+                  onRemove={() => setInputs((prev) => prev.filter((_, xdi) => xdi !== idx))}
+                  onChange={(name, type) =>
+                    setInputs((prev) => {
+                      const newInputs = [...prev];
+                      newInputs[idx] = [name, type];
+                      return newInputs;
+                    })
+                  }
+                />
+              ))}
+              <Button
+                leftIcon={<AddIcon />}
+                onClick={() => setInputs((prev) => [...prev, ['', 'string']])}
+                variant="ghost"
+                minHeight="50px"
+              >
+                Add Input
+              </Button>
+            </VStack>
+            <VStack alignItems="stretch" py="8px">
+              <Text fontSize="l" fontWeight="medium">
+                Actions
+              </Text>
+              <ActionsList actions={actions} />
+              <Button
+                leftIcon={<AddIcon />}
+                onClick={() => setIsAddActionModalOpen(true)}
+                variant="ghost"
+                minHeight="50px"
+              >
+                Add Action
+              </Button>
+            </VStack>
+          </>
         )}
         <Button
+          isLoading={isLoading}
           colorScheme="blue"
           isDisabled={!isPublishButtonEnabled}
-          onClick={() => onPublish({ name, chainId, actions })}
+          onClick={() => onPublish({ name, chainId, actions, inputs: Object.fromEntries(inputs) })}
         >
           Publish
         </Button>

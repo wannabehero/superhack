@@ -9,9 +9,9 @@ import { simulateTx } from '../tenderly';
 import { TemplateRecord } from '../eas/types';
 
 export async function publish(signer: Signer, shortcut: Shortcut): Promise<Shortcut> {
-  const actions = JSON.stringify(shortcut.actions);
+  const payload = JSON.stringify(shortcut);
   // store to ipfs
-  const ipfsId = await ipfs.store(actions);
+  const ipfsId = await ipfs.store(payload);
   const params = [
     { name: 'name', value: shortcut.name, type: 'string' },
     { name: 'chain_id', value: shortcut.chainId, type: 'uint32' },
@@ -27,10 +27,8 @@ export async function publish(signer: Signer, shortcut: Shortcut): Promise<Short
     ipfs_id: ipfsId,
   });
   return {
-    easId: easId,
-    name: shortcut.name,
-    chainId: shortcut.chainId,
-    actions: shortcut.actions,
+    ...shortcut,
+    easId,
   };
 }
 
@@ -57,14 +55,14 @@ export async function retrieveAll(): Promise<Shortcut[]> {
 
 export async function loadLocalShortcuts(): Promise<Shortcut[]> {
   const localTemplates = local.retrieve();
-  return await Promise.all(
+  return Promise.all(
     localTemplates.map(async (item) => {
       const payload = await ipfs.retrieve(item.ipfs_id);
       return {
+        ...JSON.parse(payload),
         easId: item.eas_id,
         name: item.name,
         chainId: item.chain_id,
-        actions: JSON.parse(payload),
       };
     }),
   );
@@ -102,10 +100,10 @@ async function buildShortcut(record: TemplateRecord): Promise<Shortcut> {
   });
   const payload = await ipfs.retrieve(template.ipfs_id.value);
   return {
+    ...JSON.parse(payload),
     easId: record.id,
     name: template.name.value,
     chainId: template.chain_id.value,
-    actions: JSON.parse(payload),
   };
 }
 

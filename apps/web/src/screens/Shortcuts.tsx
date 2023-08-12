@@ -37,6 +37,7 @@ const Shortcuts = () => {
   const chainId = useChainId();
   const signer = useEthersSigner({ chainId });
   const { shortcuts, fetchShortcuts } = useShortcuts();
+  const [isLoading, setIsLoading] = useState(false);
 
   const onPublish = async (shortcut: Shortcut) => {
     if (!signer) {
@@ -46,8 +47,24 @@ const Shortcuts = () => {
       });
       return;
     }
-    await publish(signer, shortcut);
-    fetchShortcuts();
+    setIsLoading(true);
+    try {
+      await publish(signer, shortcut);
+      await fetchShortcuts();
+      setIsCreateShortcutModalOpen(false);
+      toast({
+        title: 'Shortcut published',
+        status: 'success',
+      });
+    } catch (e: any) {
+      toast({
+        title: 'Failed to publish shortcut',
+        description: e.message,
+        status: 'error',
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const onRun = (shortcut: Shortcut) => {
@@ -77,7 +94,8 @@ const Shortcuts = () => {
                 <CardBody>
                   <Flex align="center">
                     <Text>{shortcut.name}</Text>
-                    <Button colorScheme="red" onClick={() => onRun(shortcut)}>
+                    <Spacer />
+                    <Button colorScheme="red" onClick={() => onRun(shortcut)} rounded="full">
                       Run
                     </Button>
                   </Flex>
@@ -96,7 +114,7 @@ const Shortcuts = () => {
           <ModalHeader>Create Shortcut</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
-            <ShortcutBuilder onPublish={onPublish} />
+            <ShortcutBuilder onPublish={onPublish} isLoading={isLoading} />
           </ModalBody>
         </ModalContent>
       </Modal>
@@ -107,7 +125,10 @@ const Shortcuts = () => {
             <DrawerCloseButton />
             <DrawerHeader>{runningShortcut.name}</DrawerHeader>
             <DrawerBody>
-              <ShortcutRunner shortcut={runningShortcut} />
+              <ShortcutRunner
+                shortcut={runningShortcut}
+                onDone={() => setRunningShortcut(undefined)}
+              />
             </DrawerBody>
           </DrawerContent>
         )}

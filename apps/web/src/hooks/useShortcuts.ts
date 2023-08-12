@@ -4,8 +4,8 @@ import { useCallback, useEffect, useState } from 'react';
 const useShortcuts = () => {
   const [shortcuts, setShortcuts] = useState<Shortcut[]>();
 
-  const fetchShortcuts = useCallback(() => {
-    retrieveAll().then(setShortcuts);
+  const fetchShortcuts = useCallback(async () => {
+    await retrieveAll().then(setShortcuts);
   }, [setShortcuts]);
 
   useEffect(() => {

@@ -37,7 +37,7 @@ class EASClient {
         data: encodedData,
       },
     });
-    return await tx.wait();
+    return await tx.wait(4);
   }
 }
 

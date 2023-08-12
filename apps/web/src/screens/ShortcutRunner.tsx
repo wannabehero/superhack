@@ -7,8 +7,20 @@ import {
   useWalletClient,
 } from 'wagmi';
 import useSafes from '../hooks/useSafes';
-import { Shortcut } from 'libs';
-import { Button, FormControl, FormLabel, Select, Text, VStack, useToast } from '@chakra-ui/react';
+import { Action, Inputs, Shortcut } from 'libs';
+import {
+  Button,
+  FormControl,
+  FormLabel,
+  Input,
+  InputGroup,
+  InputLeftAddon,
+  InputRightAddon,
+  Select,
+  Text,
+  VStack,
+  useToast,
+} from '@chakra-ui/react';
 import { useMemo, useState } from 'react';
 import { loadSafe, useEthersAdapter, useSafeService } from '../web3/safe';
 import Safe from '@safe-global/protocol-kit';
@@ -18,9 +30,11 @@ import ActionsList from '../components/ActionsList';
 import SafeProvider, { useSafeAppsSDK } from '@safe-global/safe-apps-react-sdk';
 import SafeApiKit from '@safe-global/api-kit';
 import SafeAppsSDK, { BaseTransaction } from '@safe-global/safe-apps-sdk';
+import { validateInput } from '../utils/inputs';
 
 interface ShortcutRunnerProps {
   shortcut: Shortcut;
+  onDone: () => void;
 }
 
 async function executeWithControllerSafe({
@@ -71,12 +85,31 @@ async function executeWithIndependedSafe({
   return safeTxHash;
 }
 
-const ShortcutRunner = ({ shortcut }: ShortcutRunnerProps) => {
+function substituteInputsForAction(action: Action, inputs: Inputs): Action {
+  const newAction = { ...action };
+  for (const key in action.inputs) {
+    const match = action.inputs[key].match(/^\{(\w+)\}$/);
+    if (match) {
+      newAction.inputs[key] = inputs[match[1]];
+    }
+  }
+  return newAction;
+}
+
+function substituteInputsForShortcut(shortcut: Shortcut, inputs: Inputs): Shortcut {
+  return {
+    ...shortcut,
+    actions: shortcut.actions.map((action) => substituteInputsForAction(action, inputs)),
+  };
+}
+
+const ShortcutRunner = ({ shortcut, onDone }: ShortcutRunnerProps) => {
   const toast = useToast();
   const chainId = useChainId();
   const { address } = useAccount();
   const { safes } = useSafes({ chainId, owner: address });
   const [executor, setExecutor] = useState<Address>();
+  const [inputs, setInputs] = useState<Inputs>({});
 
   const { data: walletClient } = useWalletClient();
   const publicClient = usePublicClient();
@@ -88,6 +121,18 @@ const ShortcutRunner = ({ shortcut }: ShortcutRunnerProps) => {
   const isEOA = useMemo(() => !executor || !safes || !safes.includes(executor), [safes, executor]);
 
   const safeApp = useSafeAppsSDK();
+
+  const isButtonEnabled = useMemo(
+    () =>
+      Object.entries(shortcut.inputs).reduce((acc, [name, type]) => {
+        if (!acc) {
+          return acc;
+        }
+
+        return validateInput(type, inputs[name]);
+      }, true),
+    [shortcut, inputs],
+  );
 
   const onExecute = async () => {
     if (!walletClient || !ethAdapter) {
@@ -131,10 +176,10 @@ const ShortcutRunner = ({ shortcut }: ShortcutRunnerProps) => {
         }
 
         const safeTxHash = await executeWithControllerSafe({
-          shortcut,
           selectedSafe,
           walletClient,
           safeService,
+          shortcut: substituteInputsForShortcut(shortcut, inputs),
         });
         toast({
           title: 'Transaction proposed',
@@ -143,8 +188,8 @@ const ShortcutRunner = ({ shortcut }: ShortcutRunnerProps) => {
         });
       } else if (safeApp.connected && safeApp.safe.safeAddress.length > 0) {
         const safeTxHash = await executeWithIndependedSafe({
-          shortcut,
           sdk: safeApp.sdk,
+          shortcut: substituteInputsForShortcut(shortcut, inputs),
         });
         toast({
           title: 'Transaction proposed',
@@ -159,7 +204,7 @@ const ShortcutRunner = ({ shortcut }: ShortcutRunnerProps) => {
 
         // TODO: extract this
         const txHash = await walletClient.sendTransaction({
-          ...prepareTxData(action),
+          ...prepareTxData(substituteInputsForAction(action, inputs)),
           value: 0n,
         });
         await publicClient.waitForTransactionReceipt({
@@ -171,6 +216,7 @@ const ShortcutRunner = ({ shortcut }: ShortcutRunnerProps) => {
           status: 'success',
         });
       }
+      onDone();
     } catch (e: any) {
       toast({
         title: 'Transaction failed',
@@ -202,6 +248,26 @@ const ShortcutRunner = ({ shortcut }: ShortcutRunnerProps) => {
       </FormControl>
       <VStack alignItems="stretch">
         <Text fontWeight="medium" fontSize="md">
+          Inputs
+        </Text>
+        <VStack>
+          {Object.entries(shortcut.inputs).map(([name, type], idx) => (
+            <FormControl key={`${name}-${idx}`} isInvalid={!validateInput(type, inputs[name])}>
+              <InputGroup>
+                <InputLeftAddon children={name} />
+                <Input
+                  placeholder={name}
+                  onChange={(e) => setInputs({ ...inputs, [name]: e.target.value })}
+                  value={inputs[name] ?? ''}
+                />
+                <InputRightAddon children={type} />
+              </InputGroup>
+            </FormControl>
+          ))}
+        </VStack>
+      </VStack>
+      <VStack alignItems="stretch">
+        <Text fontWeight="medium" fontSize="md">
           Actions
         </Text>
         <ActionsList actions={shortcut.actions} />
@@ -209,7 +275,7 @@ const ShortcutRunner = ({ shortcut }: ShortcutRunnerProps) => {
       <Button
         colorScheme="red"
         onClick={onExecute}
-        isDisabled={!executor || !shortcut.actions.length}
+        isDisabled={!executor || !shortcut.actions.length || !isButtonEnabled}
         alignSelf="flex-start"
         px="32px"
         isLoading={isLoading}

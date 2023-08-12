@@ -14,22 +14,8 @@ import { useEffect, useMemo, useState } from 'react';
 
 import { Action, etherscan } from 'libs';
 import { formatABIItem } from '../utils/abi';
-import { Address, isAddress } from 'viem';
-
-function validateInput(type: string, value: string): boolean {
-  switch (type) {
-    case 'address':
-      return isAddress(value);
-    case type.startsWith('uint') ? type : '':
-      try {
-        return BigInt(value) >= 0;
-      } catch {
-        return false;
-      }
-    default:
-      return true;
-  }
-}
+import { Address } from 'viem';
+import { validateInput } from '../utils/inputs';
 
 interface ActionBuilderProps {
   chainId: number;
@@ -85,6 +71,7 @@ const ActionBuilder = ({ chainId, onDone }: ActionBuilderProps) => {
         <FormControl isRequired isInvalid={!!contractError}>
           <FormLabel>Contract</FormLabel>
           <Input
+            value={contractAddress}
             placeholder="0xdead1337deed"
             onChange={(e) => setContractAddress(e.target.value)}
           />
