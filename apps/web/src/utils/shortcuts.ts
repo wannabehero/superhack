@@ -1,5 +1,5 @@
 import { Signer } from 'ethers';
-import { IPFSStorage, Shortcut, eas, local, gql } from 'libs';
+import { IPFSStorage, Shortcut, ShortcutInfo, eas, local, gql } from 'libs';
 
 const ipfs = new IPFSStorage(import.meta.env.VITE_WEB3_STORAGE_TOKEN!);
 
@@ -27,11 +27,8 @@ export async function publish(signer: Signer, shortcut: Shortcut): Promise<Short
   };
 }
 
-export async function upvote(signer: Signer, shortcut: Shortcut) {
-  if (!shortcut.easId) {
-    throw Error('upvote requires `easId` to be nonnull');
-  }
-  const params = [{ name: 'template_id', value: shortcut.easId, type: 'string' }];
+export async function upvote(signer: Signer, easId: string) {
+  const params = [{ name: 'template_id', value: easId, type: 'string' }];
   await eas.client.upvote(signer, params);
 }
 
@@ -43,9 +40,9 @@ export async function retrieve(easId: string): Promise<Shortcut> {
   return await buildShortcut({ id: easId, data: templateData });
 }
 
-export async function retrieveAll(): Promise<Shortcut[]> {
+export async function retrieveAll(): Promise<ShortcutInfo[]> {
   const templatesData = await gql.GetAllTemplates();
-  return Promise.all(templatesData.map(buildShortcut)).then((shortcuts) =>
+  return Promise.all(templatesData.map(buildShortcutInfo)).then((shortcuts) =>
     shortcuts.sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0)),
   );
 }
@@ -71,18 +68,26 @@ export async function upvoteCount(easId: string): Promise<number> {
   return await gql.CountUpvotes(params);
 }
 
-async function buildShortcut(record: eas.TemplateRecord): Promise<Shortcut> {
+async function buildShortcutInfo(record: eas.TemplateRecord): Promise<ShortcutInfo> {
   const items = eas.templateSchema.decodeData(record.data);
   const template: Record<string, any> = {};
   items.forEach((item) => {
     template[item.name] = item.value;
   });
-  const payload = await ipfs.retrieve(template.ipfs_id.value);
   return {
-    ...JSON.parse(payload),
     easId: record.id,
+    ipfsId: template.ipfs_id.value,
     name: template.name.value,
     chainId: template.chain_id.value,
     rating: await upvoteCount(record.id),
+  };
+}
+
+async function buildShortcut(record: eas.TemplateRecord): Promise<Shortcut> {
+  const info = await buildShortcutInfo(record);
+  const payload = await ipfs.retrieve(info.ipfsId);
+  return {
+    ...info,
+    ...JSON.parse(payload),
   };
 }

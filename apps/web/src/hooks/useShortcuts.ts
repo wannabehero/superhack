@@ -1,9 +1,9 @@
-import { Shortcut } from 'libs';
+import { ShortcutInfo } from 'libs';
 import { useCallback, useEffect, useState } from 'react';
 import { retrieveAll } from '../utils/shortcuts';
 
 const useShortcuts = () => {
-  const [shortcuts, setShortcuts] = useState<Shortcut[]>();
+  const [shortcuts, setShortcuts] = useState<ShortcutInfo[]>();
 
   const fetchShortcuts = useCallback(async () => {
     await retrieveAll().then(setShortcuts);

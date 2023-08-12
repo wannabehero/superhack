@@ -66,11 +66,11 @@ const Shortcuts = () => {
     }
   };
 
-  const onRun = (shortcut: Shortcut) => {
-    navigate(`/${shortcut.easId}`);
+  const onRun = (easId: string) => {
+    navigate(`/${easId}`);
   };
 
-  const onUpvote = async (shortcut: Shortcut) => {
+  const onUpvote = async (easId: string) => {
     if (!signer) {
       toast({
         title: 'No wallet connected',
@@ -79,7 +79,7 @@ const Shortcuts = () => {
       return;
     }
 
-    await upvote(signer, shortcut);
+    await upvote(signer, easId);
     await fetchShortcuts();
   };
 
@@ -107,21 +107,19 @@ const Shortcuts = () => {
                   <Flex align="center">
                     <Text>{shortcut.name}</Text>
                     <Spacer />
-                    {shortcut.rating !== undefined && (
-                      <Button
-                        leftIcon={<ArrowUpIcon />}
-                        onClick={() => onUpvote(shortcut)}
-                        variant="ghost"
-                        size="sm"
-                        rounded="full"
-                        mr={4}
-                      >
-                        {shortcut.rating === 0
-                          ? 'upvote'
-                          : `${shortcut.rating} ${shortcut.rating === 1 ? 'vote' : 'votes'}`}
-                      </Button>
-                    )}
-                    <Button colorScheme="red" onClick={() => onRun(shortcut)} rounded="full">
+                    <Button
+                      leftIcon={<ArrowUpIcon />}
+                      onClick={() => onUpvote(shortcut.easId)}
+                      variant="ghost"
+                      size="sm"
+                      rounded="full"
+                      mr={4}
+                    >
+                      {shortcut.rating === 0
+                        ? 'upvote'
+                        : `${shortcut.rating} ${shortcut.rating === 1 ? 'vote' : 'votes'}`}
+                    </Button>
+                    <Button colorScheme="red" onClick={() => onRun(shortcut.easId)} rounded="full">
                       Run
                     </Button>
                   </Flex>
