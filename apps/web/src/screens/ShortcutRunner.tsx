@@ -38,6 +38,7 @@ import SafeAppsSDK, { BaseTransaction } from '@safe-global/safe-apps-sdk';
 import { validateInput } from '../utils/inputs';
 import { useEthersSigner } from '../web3/ethersViem';
 import { useLoaderData, useNavigate } from 'react-router-dom';
+import { useConnectModal } from '@rainbow-me/rainbowkit';
 
 const tenderly = new Tenderly(import.meta.env.VITE_TENDERLY_ACCESS_KEY!);
 
@@ -110,6 +111,7 @@ function substituteInputsForShortcut(shortcut: Shortcut, inputs: Inputs): Shortc
 const ShortcutRunner = () => {
   const shortcut = useLoaderData() as Shortcut | null;
   const navigate = useNavigate();
+  const { openConnectModal } = useConnectModal();
   const toast = useToast();
   const chainId = useChainId();
   const { address } = useAccount();
@@ -278,22 +280,28 @@ const ShortcutRunner = () => {
           <DrawerHeader>{shortcut.name}</DrawerHeader>
           <DrawerBody>
             <VStack alignItems="stretch" spacing="16px">
-              <FormControl>
-                <FormLabel>Executor</FormLabel>
-                <Select
-                  placeholder="Wallet or Safe"
-                  value={executor}
-                  onChange={(e) => setExecutor(e.target.value as Address)}
-                >
-                  <option value={address}>Current: {address}</option>
-                  {!!safes &&
-                    safes.map((safe) => (
-                      <option key={safe} value={safe}>
-                        Safe: {safe}
-                      </option>
-                    ))}
-                </Select>
-              </FormControl>
+              {walletClient ? (
+                <FormControl>
+                  <FormLabel>Executor</FormLabel>
+                  <Select
+                    placeholder="Wallet or Safe"
+                    value={executor}
+                    onChange={(e) => setExecutor(e.target.value as Address)}
+                  >
+                    <option value={address}>Current: {address}</option>
+                    {!!safes &&
+                      safes.map((safe) => (
+                        <option key={safe} value={safe}>
+                          Safe: {safe}
+                        </option>
+                      ))}
+                  </Select>
+                </FormControl>
+              ) : (
+                <Button alignSelf="flex-start" onClick={openConnectModal} colorScheme="cyan">
+                  Connect wallet
+                </Button>
+              )}
               {Object.entries(shortcut.inputs).length && (
                 <VStack alignItems="stretch">
                   <Text fontWeight="medium" fontSize="md">
