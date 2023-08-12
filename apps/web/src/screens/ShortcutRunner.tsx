@@ -166,9 +166,9 @@ const ShortcutRunner = ({ shortcut, onDone }: ShortcutRunnerProps) => {
     setIsSimulating(true);
     const finalised = substituteInputsForShortcut(shortcut, inputs);
     const links = await simulate(signer, finalised);
-    alert(links);
+    window.open(links[0], '_blank', 'noreferrer');
     setIsSimulating(false);
-  }
+  };
 
   const onExecute = async () => {
     if (!walletClient || !ethAdapter) {
@@ -309,26 +309,26 @@ const ShortcutRunner = ({ shortcut, onDone }: ShortcutRunnerProps) => {
         <ActionsList actions={shortcut.actions} />
       </VStack>
       <HStack>
-      <Button
-        colorScheme="red"
-        onClick={onExecute}
-        isDisabled={!executor || !shortcut.actions.length || !isButtonEnabled}
-        alignSelf="flex-start"
-        px="32px"
-        isLoading={isLoading}
-      >
-        {isEOA ? 'Execute' : 'Propose'}
-      </Button>
-      <Button
-        colorScheme="green"
-        onClick={onSimulate}
-        isDisabled={!executor || !shortcut.actions.length || !isButtonEnabled}
-        alignSelf="flex-start"
-        px="32px"
-        isLoading={isSimulating}
-      >
-        Simulate
-      </Button>
+        <Button
+          colorScheme="red"
+          onClick={onExecute}
+          isDisabled={!executor || !shortcut.actions.length || !isButtonEnabled}
+          alignSelf="flex-start"
+          px="32px"
+          isLoading={isLoading}
+        >
+          {isEOA ? 'Execute' : 'Propose'}
+        </Button>
+        <Button
+          colorScheme="green"
+          onClick={onSimulate}
+          isDisabled={!executor || !shortcut.actions.length || !isButtonEnabled}
+          alignSelf="flex-start"
+          px="32px"
+          isLoading={isSimulating}
+        >
+          Simulate
+        </Button>
       </HStack>
     </VStack>
   );

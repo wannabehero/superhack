@@ -16,10 +16,10 @@
 
 // Optimism
 export const Constant: Record<string, string> = {
-    easContractAddress: '0x4200000000000000000000000000000000000021',
-    apolloClientUri: 'https://optimism.easscan.org/graphql',
-    easProvider: 'https://optimism.gateway.tenderly.co/PBDqGjT0pUU61jzrPjUeD',
-    tenderlyUri: 'https://api.tenderly.co/'
+  easContractAddress: '0x4200000000000000000000000000000000000021',
+  apolloClientUri: 'https://optimism.easscan.org/graphql',
+  easProvider: 'https://optimism.gateway.tenderly.co/PBDqGjT0pUU61jzrPjUeD',
+  tenderlyUri: 'https://api.tenderly.co/',
 };
 
 export const TestConstant: Record<string, string> = {

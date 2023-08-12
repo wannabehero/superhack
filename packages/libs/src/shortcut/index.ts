@@ -77,10 +77,16 @@ export async function upvoteCount(easId: string): Promise<number> {
 }
 
 export async function simulate(signer: Signer, shortcut: Shortcut): Promise<string[]> {
-  return Promise.all(shortcut.actions.map(async (action) => await simulateAction(signer, action, shortcut.chainId)));
+  return Promise.all(
+    shortcut.actions.map(async (action) => await simulateAction(signer, action, shortcut.chainId)),
+  );
 }
 
-export async function simulateAction(signer: Signer, action: Action, chainId: number): Promise<string> {
+export async function simulateAction(
+  signer: Signer,
+  action: Action,
+  chainId: number,
+): Promise<string> {
   return await simulateTx({
     contract: {
       abi: [action.func],
