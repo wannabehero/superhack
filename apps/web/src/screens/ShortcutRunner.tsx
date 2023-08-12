@@ -296,7 +296,7 @@ const ShortcutRunner = () => {
           status: 'success',
         });
       }
-      navigate(-1);
+      navigate('/');
     } catch (e: any) {
       toast({
         title: 'Transaction failed',
