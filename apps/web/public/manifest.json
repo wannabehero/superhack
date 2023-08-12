@@ -4,14 +4,21 @@
     "description": "Turn your onchain actions into Shortcuts",
     "icons": [
       {
-        "src": "vite.svg",
-        "sizes": "any",
-        "type": "image/svg+xml"
+        "src": "logo192.png",
+        "type": "image/png",
+        "sizes": "192x192"
+      },
+      {
+        "src": "logo512.png",
+        "type": "image/png",
+        "sizes": "512x512"
       }
     ],
     "start_url": ".",
     "display": "standalone",
+    "homepage_url": "https://shortcuts.wtf",
     "theme_color": "#000000",
     "background_color": "#FFFFFF",
-    "iconPath": "./vite.svg"
+    "iconPath": "./logo192.png",
+    "providedBy": { "name": "Shortcuts", "url": "https://shortcuts.wtf" }
   }
