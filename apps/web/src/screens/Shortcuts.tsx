@@ -12,10 +12,6 @@ import {
   ModalBody,
   Drawer,
   DrawerOverlay,
-  DrawerContent,
-  DrawerCloseButton,
-  DrawerHeader,
-  DrawerBody,
   useToast,
   Card,
   CardBody,
@@ -26,16 +22,17 @@ import { useState } from 'react';
 import ShortcutBuilder from './ShortcutBuilder';
 
 import { Shortcut } from 'libs';
-import ShortcutRunner from './ShortcutRunner';
 import { useChainId } from 'wagmi';
 import { useEthersSigner } from '../web3/ethersViem';
 import useShortcuts from '../hooks/useShortcuts';
 import { publish, upvote } from '../utils/shortcuts';
+import { useNavigate, useOutlet } from 'react-router-dom';
 
 const Shortcuts = () => {
+  const navigate = useNavigate();
+  const ShortcutRunner = useOutlet();
   const toast = useToast();
   const [isCreateShortcutModalOpen, setIsCreateShortcutModalOpen] = useState(false);
-  const [runningShortcut, setRunningShortcut] = useState<Shortcut>();
   const chainId = useChainId();
   const signer = useEthersSigner({ chainId });
   const { shortcuts, fetchShortcuts } = useShortcuts();
@@ -70,7 +67,7 @@ const Shortcuts = () => {
   };
 
   const onRun = (shortcut: Shortcut) => {
-    setRunningShortcut(shortcut);
+    navigate(`/${shortcut.easId}`);
   };
 
   const onUpvote = async (shortcut: Shortcut) => {
@@ -147,20 +144,9 @@ const Shortcuts = () => {
           </ModalBody>
         </ModalContent>
       </Modal>
-      <Drawer onClose={() => setRunningShortcut(undefined)} isOpen={!!runningShortcut} size="lg">
+      <Drawer onClose={() => navigate(-1)} isOpen={!!ShortcutRunner} size="lg">
         <DrawerOverlay />
-        {!!runningShortcut && (
-          <DrawerContent>
-            <DrawerCloseButton />
-            <DrawerHeader>{runningShortcut.name}</DrawerHeader>
-            <DrawerBody>
-              <ShortcutRunner
-                shortcut={runningShortcut}
-                onDone={() => setRunningShortcut(undefined)}
-              />
-            </DrawerBody>
-          </DrawerContent>
-        )}
+        {ShortcutRunner}
       </Drawer>
     </>
   );

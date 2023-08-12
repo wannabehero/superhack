@@ -10,6 +10,10 @@ import useSafes from '../hooks/useSafes';
 import { Action, Inputs, Shortcut, Tenderly } from 'libs';
 import {
   Button,
+  DrawerContent,
+  DrawerCloseButton,
+  DrawerHeader,
+  DrawerBody,
   FormControl,
   FormLabel,
   HStack,
@@ -33,12 +37,9 @@ import SafeApiKit from '@safe-global/api-kit';
 import SafeAppsSDK, { BaseTransaction } from '@safe-global/safe-apps-sdk';
 import { validateInput } from '../utils/inputs';
 import { useEthersSigner } from '../web3/ethersViem';
+import { useLoaderData, useNavigate } from 'react-router-dom';
 
 const tenderly = new Tenderly(import.meta.env.VITE_TENDERLY_ACCESS_KEY!);
-interface ShortcutRunnerProps {
-  shortcut: Shortcut;
-  onDone: () => void;
-}
 
 async function executeWithControllerSafe({
   shortcut,
@@ -106,7 +107,9 @@ function substituteInputsForShortcut(shortcut: Shortcut, inputs: Inputs): Shortc
   };
 }
 
-const ShortcutRunner = ({ shortcut, onDone }: ShortcutRunnerProps) => {
+const ShortcutRunner = () => {
+  const shortcut = useLoaderData() as Shortcut | null;
+  const navigate = useNavigate();
   const toast = useToast();
   const chainId = useChainId();
   const { address } = useAccount();
@@ -129,13 +132,15 @@ const ShortcutRunner = ({ shortcut, onDone }: ShortcutRunnerProps) => {
 
   const isButtonEnabled = useMemo(
     () =>
-      Object.entries(shortcut.inputs).reduce((acc, [name, type]) => {
-        if (!acc) {
-          return acc;
-        }
+      shortcut
+        ? Object.entries(shortcut.inputs).reduce((acc, [name, type]) => {
+            if (!acc) {
+              return acc;
+            }
 
-        return validateInput(type, inputs[name]);
-      }, true),
+            return validateInput(type, inputs[name]);
+          }, true)
+        : false,
     [shortcut, inputs],
   );
 
@@ -148,7 +153,7 @@ const ShortcutRunner = ({ shortcut, onDone }: ShortcutRunnerProps) => {
       return;
     }
 
-    if (chainId !== shortcut.chainId) {
+    if (!shortcut || chainId !== shortcut.chainId) {
       toast({
         title: 'TODO: handle multichain shortcuts',
         status: 'warning',
@@ -180,7 +185,7 @@ const ShortcutRunner = ({ shortcut, onDone }: ShortcutRunnerProps) => {
       return;
     }
 
-    if (chainId !== shortcut.chainId) {
+    if (!shortcut || chainId !== shortcut.chainId) {
       toast({
         title: 'TODO: handle multichain shortcuts',
         status: 'warning',
@@ -253,7 +258,7 @@ const ShortcutRunner = ({ shortcut, onDone }: ShortcutRunnerProps) => {
           status: 'success',
         });
       }
-      onDone();
+      navigate(-1);
     } catch (e: any) {
       toast({
         title: 'Transaction failed',
@@ -266,78 +271,95 @@ const ShortcutRunner = ({ shortcut, onDone }: ShortcutRunnerProps) => {
   };
 
   return (
-    <VStack alignItems="stretch" spacing="16px">
-      <FormControl>
-        <FormLabel>Executor</FormLabel>
-        <Select
-          placeholder="Wallet or Safe"
-          value={executor}
-          onChange={(e) => setExecutor(e.target.value as Address)}
-        >
-          <option value={address}>Current: {address}</option>
-          {!!safes &&
-            safes.map((safe) => (
-              <option key={safe} value={safe}>
-                Safe: {safe}
-              </option>
-            ))}
-        </Select>
-      </FormControl>
-      <VStack alignItems="stretch">
-        <Text fontWeight="medium" fontSize="md">
-          Inputs
-        </Text>
-        <VStack>
-          {Object.entries(shortcut.inputs).map(([name, type], idx) => (
-            <FormControl key={`${name}-${idx}`} isInvalid={!validateInput(type, inputs[name])}>
-              <InputGroup>
-                <InputLeftAddon children={name} />
-                <Input
-                  placeholder={name}
-                  onChange={(e) => setInputs({ ...inputs, [name]: e.target.value })}
-                  value={inputs[name] ?? ''}
-                />
-                <InputRightAddon children={type} />
-              </InputGroup>
-            </FormControl>
-          ))}
-        </VStack>
-      </VStack>
-      <VStack alignItems="stretch">
-        <Text fontWeight="medium" fontSize="md">
-          Actions
-        </Text>
-        <ActionsList actions={shortcut.actions} />
-      </VStack>
-      <HStack>
-        <Button
-          colorScheme="red"
-          onClick={onExecute}
-          isDisabled={!executor || !shortcut.actions.length || !isButtonEnabled}
-          alignSelf="flex-start"
-          px="32px"
-          isLoading={isLoading}
-        >
-          {isEOA ? 'Execute' : 'Propose'}
-        </Button>
-        <Button
-          colorScheme="green"
-          onClick={onSimulate}
-          isDisabled={!executor || !shortcut.actions.length || !isButtonEnabled}
-          alignSelf="flex-start"
-          px="32px"
-          isLoading={isSimulating}
-        >
-          Simulate
-        </Button>
-      </HStack>
-    </VStack>
+    <DrawerContent>
+      {shortcut ? (
+        <>
+          <DrawerCloseButton />
+          <DrawerHeader>{shortcut.name}</DrawerHeader>
+          <DrawerBody>
+            <VStack alignItems="stretch" spacing="16px">
+              <FormControl>
+                <FormLabel>Executor</FormLabel>
+                <Select
+                  placeholder="Wallet or Safe"
+                  value={executor}
+                  onChange={(e) => setExecutor(e.target.value as Address)}
+                >
+                  <option value={address}>Current: {address}</option>
+                  {!!safes &&
+                    safes.map((safe) => (
+                      <option key={safe} value={safe}>
+                        Safe: {safe}
+                      </option>
+                    ))}
+                </Select>
+              </FormControl>
+              {Object.entries(shortcut.inputs).length && (
+                <VStack alignItems="stretch">
+                  <Text fontWeight="medium" fontSize="md">
+                    Inputs
+                  </Text>
+                  <VStack>
+                    {Object.entries(shortcut.inputs).map(([name, type], idx) => (
+                      <FormControl
+                        key={`${name}-${idx}`}
+                        isInvalid={!validateInput(type, inputs[name])}
+                      >
+                        <InputGroup>
+                          <InputLeftAddon children={name} />
+                          <Input
+                            placeholder={name}
+                            onChange={(e) => setInputs({ ...inputs, [name]: e.target.value })}
+                            value={inputs[name] ?? ''}
+                          />
+                          <InputRightAddon children={type} />
+                        </InputGroup>
+                      </FormControl>
+                    ))}
+                  </VStack>
+                </VStack>
+              )}
+              <VStack alignItems="stretch">
+                <Text fontWeight="medium" fontSize="md">
+                  Actions
+                </Text>
+                <ActionsList actions={shortcut.actions} />
+              </VStack>
+              <HStack>
+                <Button
+                  colorScheme="red"
+                  onClick={onExecute}
+                  isDisabled={!executor || !shortcut.actions.length || !isButtonEnabled}
+                  alignSelf="flex-start"
+                  px="32px"
+                  isLoading={isLoading}
+                >
+                  {isEOA ? 'Execute' : 'Propose'}
+                </Button>
+                <Button
+                  colorScheme="green"
+                  onClick={onSimulate}
+                  isDisabled={!executor || !shortcut.actions.length || !isButtonEnabled}
+                  alignSelf="flex-start"
+                  px="32px"
+                  isLoading={isSimulating}
+                >
+                  Simulate
+                </Button>
+              </HStack>
+            </VStack>
+          </DrawerBody>
+        </>
+      ) : (
+        <></>
+      )}
+    </DrawerContent>
   );
 };
 
-const WrappedRunner = (props: ShortcutRunnerProps) => (
+const WrappedRunner = () => (
   <SafeProvider>
-    <ShortcutRunner {...props} />
+    <ShortcutRunner />
   </SafeProvider>
 );
 
