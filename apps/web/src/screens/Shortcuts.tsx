@@ -142,7 +142,7 @@ const Shortcuts = () => {
           </ModalBody>
         </ModalContent>
       </Modal>
-      <Drawer onClose={() => navigate(-1)} isOpen={!!ShortcutRunner} size="lg">
+      <Drawer onClose={() => navigate('/')} isOpen={!!ShortcutRunner} size="lg">
         <DrawerOverlay />
         {ShortcutRunner}
       </Drawer>
