@@ -50,7 +50,9 @@ export async function retrieve(easId: string): Promise<Shortcut> {
 
 export async function retrieveAll(): Promise<Shortcut[]> {
   const templatesData = await GetAllTemplates();
-  return Promise.all(templatesData.map(buildShortcut));
+  return Promise.all(templatesData.map(buildShortcut)).then((shortcuts) =>
+    shortcuts.sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0)),
+  );
 }
 
 export async function loadLocalShortcuts(): Promise<Shortcut[]> {
