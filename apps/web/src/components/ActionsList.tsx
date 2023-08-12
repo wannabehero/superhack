@@ -1,4 +1,4 @@
-import { Card, CardBody, Flex, Text, VStack } from '@chakra-ui/react';
+import { Card, CardBody, Code, Flex, VStack } from '@chakra-ui/react';
 import { Action } from 'libs';
 import { formatABIItem } from '../utils/abi';
 
@@ -13,7 +13,9 @@ const ActionsList = ({ actions }: ActionsListProps) => {
         <Card key={`action-${idx}`} _hover={{ opacity: 0.8, cursor: 'pointer' }} variant="outline">
           <CardBody>
             <Flex align="center">
-              <Text>{formatABIItem({ item: action.func, inputs: action.inputs })}</Text>
+              <Code>
+                {formatABIItem({ item: action.func, inputs: action.inputs, value: action.value })}
+              </Code>
             </Flex>
           </CardBody>
         </Card>

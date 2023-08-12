@@ -27,7 +27,7 @@ export class Tenderly {
       from: p.sender,
       to: contract.address,
       input: unsignedTx.data,
-      gas: 100000,
+      gas: 100000000,
       gas_price: '0',
       value: p.value,
     });
@@ -71,12 +71,14 @@ export class Tenderly {
         contractAddress: action.contract,
         provider: signer,
         funcName: action.func.name!,
-        args: Object.values(action.inputs),
+        args: action.func.inputs
+          .map((input) => action.inputs[input.name])
+          .map((value) => (value === '0x0' ? [] : value)),
       },
       type: 'full',
       sender: await signer.getAddress(),
       network_id: chainId.toString(),
-      value: 0.0,
+      value: action.value ?? '0',
     });
   }
 }

@@ -1,5 +1,6 @@
 import {
   Button,
+  Divider,
   FormControl,
   FormHelperText,
   FormLabel,
@@ -16,6 +17,7 @@ import { ABI, ABIItem, Action, Etherscan } from 'libs';
 import { formatABIItem } from '../utils/abi';
 import { Address } from 'viem';
 import { validateInput } from '../utils/inputs';
+import { useNetwork } from 'wagmi';
 
 const etherscan = new Etherscan({
   1: import.meta.env.VITE_ETHERSCAN_API_KEY!,
@@ -37,6 +39,8 @@ const ActionBuilder = ({ chainId, onDone }: ActionBuilderProps) => {
   const [abi, setABI] = useState<ABI>();
   const [func, setFunc] = useState<ABIItem | null>(null);
   const [inputs, setInputs] = useState<Record<string, any>>({});
+  const [value, setValue] = useState<string>('0');
+  const network = useNetwork();
 
   useEffect(() => {
     if (!contractAddress.match(/^0x[a-fA-F0-9]{40}$/)) {
@@ -57,7 +61,11 @@ const ActionBuilder = ({ chainId, onDone }: ActionBuilderProps) => {
       return undefined;
     }
 
-    return abi.filter((item) => item.type === 'function' && item.stateMutability === 'nonpayable');
+    return abi.filter(
+      (item) =>
+        item.type === 'function' &&
+        (item.stateMutability === 'nonpayable' || item.stateMutability === 'payable'),
+    );
   }, [abi]);
 
   const isButtonEnabled = useMemo(() => {
@@ -119,6 +127,22 @@ const ActionBuilder = ({ chainId, onDone }: ActionBuilderProps) => {
                 </InputGroup>
               </FormControl>
             ))}
+            <Divider />
+            {func.stateMutability === 'payable' && (
+              <FormControl isInvalid={!validateInput('uint256', value)}>
+                <InputGroup>
+                  <InputLeftAddon children={'value'} />
+                  <Input
+                    placeholder={'value'}
+                    onChange={(e) => setValue(e.target.value)}
+                    value={value}
+                  />
+                  {network.chain && (
+                    <InputRightAddon children={network.chain.nativeCurrency.symbol} />
+                  )}
+                </InputGroup>
+              </FormControl>
+            )}
           </VStack>
         )}
         <Button
@@ -126,7 +150,15 @@ const ActionBuilder = ({ chainId, onDone }: ActionBuilderProps) => {
           alignSelf="flex-start"
           colorScheme="blue"
           isDisabled={!isButtonEnabled}
-          onClick={() => !!func && onDone({ func, inputs, contract: contractAddress as Address })}
+          onClick={() =>
+            !!func &&
+            onDone({
+              func,
+              inputs,
+              contract: contractAddress as Address,
+              value: func.stateMutability === 'payable' ? value : undefined,
+            })
+          }
         >
           Done
         </Button>

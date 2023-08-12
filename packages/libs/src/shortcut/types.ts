@@ -3,7 +3,7 @@ import { Address } from 'viem';
 
 // FIXME: inputs should be better typed
 export type Inputs = Record<string, string>;
-export type Action = { contract: Address; func: ABIItem; inputs: Inputs };
+export type Action = { contract: Address; func: ABIItem; inputs: Inputs; value?: string };
 export type ShortcutInfo = {
   easId: string;
   name: string;

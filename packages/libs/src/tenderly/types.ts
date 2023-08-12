@@ -14,5 +14,5 @@ export interface TenderlyParams {
   type: 'full' | 'quick' | 'abi';
   sender: string;
   network_id: string;
-  value: number;
+  value: string;
 }

@@ -3,6 +3,7 @@ import {
   WalletClient,
   useAccount,
   useChainId,
+  useNetwork,
   usePublicClient,
   useWalletClient,
 } from 'wagmi';
@@ -40,7 +41,7 @@ import SafeAppsSDK, { BaseTransaction } from '@safe-global/safe-apps-sdk';
 import { validateInput } from '../utils/inputs';
 import { useEthersSigner } from '../web3/ethersViem';
 import { useLoaderData, useNavigate } from 'react-router-dom';
-import { useConnectModal } from '@rainbow-me/rainbowkit';
+import { useChainModal, useConnectModal } from '@rainbow-me/rainbowkit';
 
 const tenderly = new Tenderly(import.meta.env.VITE_TENDERLY_ACCESS_KEY!);
 
@@ -56,7 +57,6 @@ async function executeWithControllerSafe({
   safeService: SafeApiKit;
 }): Promise<string> {
   const data: MetaTransactionData[] = shortcut.actions.map((action) => ({
-    value: '0',
     operation: OperationType.Call,
     ...prepareTxData(action),
   }));
@@ -83,10 +83,7 @@ async function executeWithIndependedSafe({
   sdk: SafeAppsSDK;
 }) {
   // we are inside a Safe App
-  const txs: BaseTransaction[] = shortcut.actions.map((action) => ({
-    value: '0',
-    ...prepareTxData(action),
-  }));
+  const txs: BaseTransaction[] = shortcut.actions.map(prepareTxData);
   // Returns a hash to identify the Safe transaction
   const { safeTxHash } = await sdk.txs.send({ txs });
   return safeTxHash;
@@ -99,6 +96,10 @@ function substituteInputsForAction(action: Action, inputs: Inputs): Action {
     if (match) {
       newAction.inputs[key] = inputs[match[1]];
     }
+  }
+  const match = action.value?.match(/^\{(\w+)\}$/);
+  if (match) {
+    newAction.value = inputs[match[1]] ?? inputs[`{${match[1]}}`];
   }
   return newAction;
 }
@@ -114,12 +115,14 @@ const ShortcutRunner = () => {
   const shortcut = useLoaderData() as Shortcut | null;
   const navigate = useNavigate();
   const { openConnectModal } = useConnectModal();
+  const { openChainModal } = useChainModal();
   const toast = useToast();
   const chainId = useChainId();
   const { address } = useAccount();
   const { safes } = useSafes({ chainId, owner: address });
   const [executor, setExecutor] = useState<Address>();
   const [inputs, setInputs] = useState<Inputs>({});
+  const { chains } = useNetwork();
 
   const { data: walletClient } = useWalletClient();
   const publicClient = usePublicClient();
@@ -195,10 +198,19 @@ const ShortcutRunner = () => {
     }
 
     setIsSimulating(true);
-    const finalised = substituteInputsForShortcut(shortcut, inputs);
-    const links = await tenderly.simulate(signer, finalised);
-    window.open(links[0], '_blank', 'noreferrer');
-    setIsSimulating(false);
+    try {
+      const finalised = substituteInputsForShortcut(shortcut, inputs);
+      const links = await tenderly.simulate(signer, finalised);
+      window.open(links[0], '_blank', 'noreferrer');
+    } catch (e: any) {
+      toast({
+        title: 'Simulation failed',
+        description: e.message,
+        status: 'error',
+      });
+    } finally {
+      setIsSimulating(false);
+    }
   };
 
   const onExecute = async () => {
@@ -270,9 +282,10 @@ const ShortcutRunner = () => {
         const [action] = shortcut.actions;
 
         // TODO: extract this
+        const txData = prepareTxData(substituteInputsForAction(action, inputs));
         const txHash = await walletClient.sendTransaction({
-          ...prepareTxData(substituteInputsForAction(action, inputs)),
-          value: 0n,
+          ...txData,
+          value: BigInt(txData.value),
         });
         await publicClient.waitForTransactionReceipt({
           hash: txHash,
@@ -317,6 +330,11 @@ const ShortcutRunner = () => {
           </DrawerHeader>
           <DrawerBody>
             <VStack alignItems="stretch" spacing="16px">
+              {walletClient && chainId !== shortcut.chainId && (
+                <Button alignSelf="flex-start" onClick={openChainModal} colorScheme="red">
+                  Switch to {chains.find((chain) => chain.id === shortcut.chainId)?.name}
+                </Button>
+              )}
               {walletClient ? (
                 <FormControl>
                   <FormLabel>Executor</FormLabel>
@@ -351,7 +369,7 @@ const ShortcutRunner = () => {
                         isInvalid={!validateInput(type, inputs[name])}
                       >
                         <InputGroup>
-                          <InputLeftAddon children={name} />
+                          <InputLeftAddon children={name.replace(/[{}]/g, '')} />
                           <Input
                             placeholder={name}
                             onChange={(e) => setInputs({ ...inputs, [name]: e.target.value })}
