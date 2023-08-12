@@ -128,7 +128,8 @@ function encodedInput(inputs: Inputs): string {
 }
 
 const ShortcutRunner = () => {
-  const shortcut = useLoaderData() as Shortcut | null;
+  const preset = useLoaderData() as [Shortcut, Inputs] | null;
+  const shortcut = preset?.[0];
   const navigate = useNavigate();
   const { openConnectModal } = useConnectModal();
   const { openChainModal } = useChainModal();
@@ -137,7 +138,7 @@ const ShortcutRunner = () => {
   const { address } = useAccount();
   const { safes } = useSafes({ chainId, owner: address });
   const [executor, setExecutor] = useState<Address>();
-  const [inputs, setInputs] = useState<Inputs>({});
+  const [inputs, setInputs] = useState<Inputs>(preset?.[1] ?? {});
   const { chains } = useNetwork();
 
   const { data: walletClient } = useWalletClient();
@@ -175,7 +176,7 @@ const ShortcutRunner = () => {
     const params = encodedInput(inputs);
     const data = {
       title: shortcut.name,
-      url: `${shortcut.easId}${params}`,
+      url: `${window.location.origin}/${shortcut.easId}${params}`,
     };
     console.log(data);
     if (navigator.share && navigator.canShare && navigator.canShare(data)) {
@@ -337,13 +338,6 @@ const ShortcutRunner = () => {
                 {shortcut.name.slice(0, 32)}
                 {shortcut.name.length > 32 ? '...' : ''}
               </Text>
-              <IconButton
-                aria-label="Share shortcut"
-                icon={<LinkIcon />}
-                variant="ghost"
-                rounded="full"
-                onClick={() => onShare()}
-              />
             </HStack>
           </DrawerHeader>
           <DrawerBody>
