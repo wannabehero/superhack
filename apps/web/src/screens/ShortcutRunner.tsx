@@ -7,6 +7,7 @@ import {
   useWalletClient,
 } from 'wagmi';
 import useSafes from '../hooks/useSafes';
+import { LinkIcon } from '@chakra-ui/icons';
 import { Action, Inputs, Shortcut, Tenderly } from 'libs';
 import {
   Button,
@@ -25,6 +26,7 @@ import {
   Text,
   VStack,
   useToast,
+  IconButton,
 } from '@chakra-ui/react';
 import { useMemo, useState } from 'react';
 import { loadSafe, useEthersAdapter, useSafeService } from '../web3/safe';
@@ -145,6 +147,27 @@ const ShortcutRunner = () => {
         : false,
     [shortcut, inputs],
   );
+
+  const onShare = () => {
+    if (!shortcut) {
+      return;
+    }
+
+    const data = {
+      title: shortcut.name,
+      url: window.location.href,
+    };
+    if (navigator.share && navigator.canShare && navigator.canShare(data)) {
+      navigator.share(data);
+    } else {
+      navigator.clipboard.writeText(window.location.href);
+      toast({
+        title: 'Copied to clipboard',
+        status: 'info',
+        duration: 2000,
+      });
+    }
+  };
 
   const onSimulate = async () => {
     if (!signer) {
@@ -277,7 +300,21 @@ const ShortcutRunner = () => {
       {shortcut ? (
         <>
           <DrawerCloseButton />
-          <DrawerHeader>{shortcut.name}</DrawerHeader>
+          <DrawerHeader>
+            <HStack alignItems="center">
+              <Text>
+                {shortcut.name.slice(0, 32)}
+                {shortcut.name.length > 32 ? '...' : ''}
+              </Text>
+              <IconButton
+                aria-label="Share shortcut"
+                icon={<LinkIcon />}
+                variant="ghost"
+                rounded="full"
+                onClick={() => onShare()}
+              />
+            </HStack>
+          </DrawerHeader>
           <DrawerBody>
             <VStack alignItems="stretch" spacing="16px">
               {walletClient ? (
