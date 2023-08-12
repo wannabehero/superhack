@@ -21,10 +21,11 @@ import {
   CardBody,
   Flex,
 } from '@chakra-ui/react';
+import { ArrowUpIcon } from '@chakra-ui/icons';
 import { useState } from 'react';
 import ShortcutBuilder from './ShortcutBuilder';
 
-import { Shortcut, publish } from 'libs';
+import { Shortcut, publish, upvote } from 'libs';
 import ShortcutRunner from './ShortcutRunner';
 import { useChainId } from 'wagmi';
 import { useEthersSigner } from '../web3/ethersViem';
@@ -71,6 +72,19 @@ const Shortcuts = () => {
     setRunningShortcut(shortcut);
   };
 
+  const onUpvote = async (shortcut: Shortcut) => {
+    if (!signer) {
+      toast({
+        title: 'No wallet connected',
+        status: 'error',
+      });
+      return;
+    }
+
+    await upvote(signer, shortcut);
+    await fetchShortcuts();
+  };
+
   return (
     <>
       <VStack align="stretch">
@@ -89,12 +103,26 @@ const Shortcuts = () => {
         </HStack>
         <VStack alignItems="stretch">
           {!!shortcuts &&
-            shortcuts.map((shortcut, idx) => (
-              <Card key={`shortcut-${idx}`} variant="outline">
+            shortcuts.map((shortcut) => (
+              <Card key={`shortcut-${shortcut.easId}`} variant="outline">
                 <CardBody>
                   <Flex align="center">
                     <Text>{shortcut.name}</Text>
                     <Spacer />
+                    {shortcut.rating !== undefined && (
+                      <Button
+                        leftIcon={<ArrowUpIcon />}
+                        onClick={() => onUpvote(shortcut)}
+                        variant="ghost"
+                        size="sm"
+                        rounded="full"
+                        mr={4}
+                      >
+                        {shortcut.rating === 0
+                          ? 'upvote'
+                          : `${shortcut.rating} ${shortcut.rating === 1 ? 'vote' : 'votes'}`}
+                      </Button>
+                    )}
                     <Button colorScheme="red" onClick={() => onRun(shortcut)} rounded="full">
                       Run
                     </Button>

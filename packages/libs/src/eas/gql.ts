@@ -46,6 +46,7 @@ export async function CountUpvotes(items: SchemaItem[]): Promise<number> {
         data: { equals: templateUpvoteSchema.encodeData(items) },
       },
     },
+    fetchPolicy: 'no-cache',
   });
   return response.data.aggregateAttestation._count?._all ?? 0;
 }
@@ -62,6 +63,7 @@ export async function GetAllTemplates(): Promise<TemplateRecord[]> {
   const response = await apolloClient.query({
     query: GET_ALL_TEMPLATES,
     variables: { where: { schemaId: { equals: templateSchema.uid } } },
+    fetchPolicy: 'no-cache',
   });
   return response.data.attestations.flatMap((item) => ({ id: item.id, data: item.data }));
 }

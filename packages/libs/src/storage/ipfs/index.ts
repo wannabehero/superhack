@@ -19,7 +19,7 @@ export async function store(object: unknown): Promise<Address> {
 export async function retrieve(cidHex: Address) {
   const cid = fromHex(cidHex, 'string');
   const res = await client.get(cid);
-  console.log(`Got a response! [${res?.status}] ${res?.statusText}`);
+
   if (!res || !res.ok) {
     throw new Error(`failed to get ${cid}`);
   }
