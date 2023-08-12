@@ -28,6 +28,7 @@ import {
   VStack,
   useToast,
   IconButton,
+  Spacer,
 } from '@chakra-ui/react';
 import { useMemo, useState } from 'react';
 import { loadSafe, useEthersAdapter, useSafeService } from '../web3/safe';
@@ -111,6 +112,21 @@ function substituteInputsForShortcut(shortcut: Shortcut, inputs: Inputs): Shortc
   };
 }
 
+function encodedInput(inputs: Inputs): string {
+  const filtered = Object.entries(inputs).reduce((acc, [name, value]) => { 
+    if (value) {
+      acc.set(name, value);
+    } 
+    return acc;
+  }, new Map<string, string>());
+  const query = new URLSearchParams(Object.fromEntries(filtered));
+  if (query.size > 0) {
+    return `?${query.toString()}`
+  } else {
+    return ''
+  }
+}
+
 const ShortcutRunner = () => {
   const shortcut = useLoaderData() as Shortcut | null;
   const navigate = useNavigate();
@@ -156,14 +172,16 @@ const ShortcutRunner = () => {
       return;
     }
 
+    const params = encodedInput(inputs);
     const data = {
       title: shortcut.name,
-      url: window.location.href,
+      url: `${shortcut.easId}${params}`,
     };
+    console.log(data);
     if (navigator.share && navigator.canShare && navigator.canShare(data)) {
       navigator.share(data);
     } else {
-      navigator.clipboard.writeText(window.location.href);
+      navigator.clipboard.writeText(data.url);
       toast({
         title: 'Copied to clipboard',
         status: 'info',
@@ -408,6 +426,16 @@ const ShortcutRunner = () => {
                   isLoading={isSimulating}
                 >
                   Simulate
+                </Button>
+                <Spacer></Spacer>
+                <Button
+                  leftIcon={<LinkIcon />}
+                  variant="ghost"
+                  onClick={() => onShare()}
+                  alignSelf="flex-start"
+                  px="32px"
+                >
+                  Share
                 </Button>
               </HStack>
             </VStack>
