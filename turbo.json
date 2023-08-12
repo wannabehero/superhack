@@ -15,7 +15,8 @@
         "VITE_ETHERSCAN_API_KEY",
         "VITE_WEB3_STORAGE_TOKEN",
         "VITE_TENDERLY_ACCESS_KEY"
-      ]
+      ],
+      "outputs": ["dist/**"]
     },
     "lint": {},
     "dev": {
