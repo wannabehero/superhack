@@ -69,17 +69,15 @@ export async function localShortcuts(): Promise<Shortcut[]> {
         name: item.name, 
         chainId: item.chain_id,
         actions: JSON.parse(payload),
+        rating: await upvoteCount(item.eas_id),
       }
     })
   );
 }
 
-export async function upvoteCount(shortcut: Shortcut): Promise<number> {
-  if (!shortcut.easId) {
-    throw Error('upvoteCount requires `easId` to be nonnull');
-  }
+export async function upvoteCount(easId: string): Promise<number> {
   const params = [
-    { name: 'template_id', value: shortcut.easId, type: 'string' },
+    { name: 'template_id', value: easId, type: 'string' },
   ]
   return await CountUpvotes(params);
 }
