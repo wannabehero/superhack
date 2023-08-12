@@ -14,7 +14,7 @@ import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/
  */
 const documents = {
     "\nquery GetTemplate($where: AttestationWhereUniqueInput!) {\n  attestation(where: $where) {\n    data\n  }\n}\n": types.GetTemplateDocument,
-    "\nquery GetAllTemplates($where: AttestationWhereInput) {\n  attestations(where: $where) {\n    id\n    data\n  }\n}\n": types.GetAllTemplatesDocument,
+    "\nquery GetAllTemplates($where: AttestationWhereInput, $skip: Int) {\n  attestations(orderBy: { timeCreated: asc }, where: $where, skip: $skip) {\n    id\n    data\n  }\n}\n": types.GetAllTemplatesDocument,
     "\nquery CountUpvotes($where: AttestationWhereInput) {\n  aggregateAttestation(where: $where) {\n    _count {\n      _all\n    }\n  }\n}": types.CountUpvotesDocument,
 };
 
@@ -39,7 +39,7 @@ export function gql(source: "\nquery GetTemplate($where: AttestationWhereUniqueI
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function gql(source: "\nquery GetAllTemplates($where: AttestationWhereInput) {\n  attestations(where: $where) {\n    id\n    data\n  }\n}\n"): (typeof documents)["\nquery GetAllTemplates($where: AttestationWhereInput) {\n  attestations(where: $where) {\n    id\n    data\n  }\n}\n"];
+export function gql(source: "\nquery GetAllTemplates($where: AttestationWhereInput, $skip: Int) {\n  attestations(orderBy: { timeCreated: asc }, where: $where, skip: $skip) {\n    id\n    data\n  }\n}\n"): (typeof documents)["\nquery GetAllTemplates($where: AttestationWhereInput, $skip: Int) {\n  attestations(orderBy: { timeCreated: asc }, where: $where, skip: $skip) {\n    id\n    data\n  }\n}\n"];
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

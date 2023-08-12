@@ -2,6 +2,7 @@ import { Signer } from 'ethers';
 import { IPFSStorage, Shortcut, ShortcutInfo, eas, local, gql } from 'libs';
 
 const ipfs = new IPFSStorage(import.meta.env.VITE_WEB3_STORAGE_TOKEN!);
+const skip = parseInt(import.meta.env.VITE_SKIP_FIRST_N_SHORTCUTS ?? '0');
 
 export async function publish(signer: Signer, shortcut: Shortcut): Promise<Shortcut> {
   const payload = JSON.stringify(shortcut);
@@ -41,7 +42,7 @@ export async function retrieve(easId: string): Promise<Shortcut> {
 }
 
 export async function retrieveAll(): Promise<ShortcutInfo[]> {
-  const templatesData = await gql.GetAllTemplates();
+  const templatesData = await gql.GetAllTemplates(skip);
   return Promise.all(templatesData.map(buildShortcutInfo)).then((shortcuts) =>
     shortcuts.sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0)),
   );

@@ -20,8 +20,8 @@ query GetTemplate($where: AttestationWhereUniqueInput!) {
 `);
 
 const GET_ALL_TEMPLATES = gql(`
-query GetAllTemplates($where: AttestationWhereInput) {
-  attestations(where: $where) {
+query GetAllTemplates($where: AttestationWhereInput, $skip: Int) {
+  attestations(orderBy: { timeCreated: asc }, where: $where, skip: $skip) {
     id
     data
   }
@@ -59,10 +59,10 @@ export async function GetTemplate(easId: string): Promise<string | undefined> {
   return response.data.attestation?.data;
 }
 
-export async function GetAllTemplates(): Promise<TemplateRecord[]> {
+export async function GetAllTemplates(skip?: number): Promise<TemplateRecord[]> {
   const response = await apolloClient.query({
     query: GET_ALL_TEMPLATES,
-    variables: { where: { schemaId: { equals: templateSchema.uid } } },
+    variables: { where: { schemaId: { equals: templateSchema.uid } }, skip: skip },
     fetchPolicy: 'no-cache',
   });
   return response.data.attestations.flatMap((item) => ({ id: item.id, data: item.data }));
