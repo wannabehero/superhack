@@ -1,12 +1,7 @@
 import { Signer } from 'ethers';
-import { eas } from '..';
-import { ipfs } from '../storage';
-import { local } from '../storage';
-import { Action, Shortcut } from './types';
-import { CountUpvotes, GetAllTemplates, GetTemplate } from '../eas/gql';
-import { templateSchema } from '../eas';
-import { simulateTx } from '../tenderly';
-import { TemplateRecord } from '../eas/types';
+import { IPFSStorage, Shortcut, eas, local, gql } from 'libs';
+
+const ipfs = new IPFSStorage(import.meta.env.VITE_WEB3_STORAGE_TOKEN!);
 
 export async function publish(signer: Signer, shortcut: Shortcut): Promise<Shortcut> {
   const payload = JSON.stringify(shortcut);
@@ -41,7 +36,7 @@ export async function upvote(signer: Signer, shortcut: Shortcut) {
 }
 
 export async function retrieve(easId: string): Promise<Shortcut> {
-  const templateData = await GetTemplate(easId);
+  const templateData = await gql.GetTemplate(easId);
   if (!templateData) {
     throw Error(`oops, no template for 'easId' = ${easId} found`);
   }
@@ -49,7 +44,7 @@ export async function retrieve(easId: string): Promise<Shortcut> {
 }
 
 export async function retrieveAll(): Promise<Shortcut[]> {
-  const templatesData = await GetAllTemplates();
+  const templatesData = await gql.GetAllTemplates();
   return Promise.all(templatesData.map(buildShortcut)).then((shortcuts) =>
     shortcuts.sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0)),
   );
@@ -73,37 +68,11 @@ export async function loadLocalShortcuts(): Promise<Shortcut[]> {
 
 export async function upvoteCount(easId: string): Promise<number> {
   const params = [{ name: 'template_id', value: easId, type: 'string' }];
-  return await CountUpvotes(params);
+  return await gql.CountUpvotes(params);
 }
 
-export async function simulate(signer: Signer, shortcut: Shortcut): Promise<string[]> {
-  return Promise.all(
-    shortcut.actions.map(async (action) => await simulateAction(signer, action, shortcut.chainId)),
-  );
-}
-
-export async function simulateAction(
-  signer: Signer,
-  action: Action,
-  chainId: number,
-): Promise<string> {
-  return await simulateTx({
-    contract: {
-      abi: [action.func],
-      contractAddress: action.contract,
-      provider: signer,
-      funcName: action.func.name!,
-      args: Object.values(action.inputs),
-    },
-    type: 'full',
-    sender: await signer.getAddress(),
-    network_id: chainId.toString(),
-    value: 0.0,
-  });
-}
-
-async function buildShortcut(record: TemplateRecord): Promise<Shortcut> {
-  const items = templateSchema.decodeData(record.data);
+async function buildShortcut(record: eas.TemplateRecord): Promise<Shortcut> {
+  const items = eas.templateSchema.decodeData(record.data);
   const template: Record<string, any> = {};
   items.forEach((item) => {
     template[item.name] = item.value;
@@ -117,5 +86,3 @@ async function buildShortcut(record: TemplateRecord): Promise<Shortcut> {
     rating: await upvoteCount(record.id),
   };
 }
-
-export * from './types';

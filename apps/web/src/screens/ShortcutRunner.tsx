@@ -7,7 +7,7 @@ import {
   useWalletClient,
 } from 'wagmi';
 import useSafes from '../hooks/useSafes';
-import { Action, Inputs, Shortcut, simulate } from 'libs';
+import { Action, Inputs, Shortcut, Tenderly } from 'libs';
 import {
   Button,
   FormControl,
@@ -34,6 +34,7 @@ import SafeAppsSDK, { BaseTransaction } from '@safe-global/safe-apps-sdk';
 import { validateInput } from '../utils/inputs';
 import { useEthersSigner } from '../web3/ethersViem';
 
+const tenderly = new Tenderly(import.meta.env.VITE_TENDERLY_ACCESS_KEY!);
 interface ShortcutRunnerProps {
   shortcut: Shortcut;
   onDone: () => void;
@@ -165,7 +166,7 @@ const ShortcutRunner = ({ shortcut, onDone }: ShortcutRunnerProps) => {
 
     setIsSimulating(true);
     const finalised = substituteInputsForShortcut(shortcut, inputs);
-    const links = await simulate(signer, finalised);
+    const links = await tenderly.simulate(signer, finalised);
     window.open(links[0], '_blank', 'noreferrer');
     setIsSimulating(false);
   };

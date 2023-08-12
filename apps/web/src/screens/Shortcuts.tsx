@@ -25,11 +25,12 @@ import { ArrowUpIcon } from '@chakra-ui/icons';
 import { useState } from 'react';
 import ShortcutBuilder from './ShortcutBuilder';
 
-import { Shortcut, publish, upvote } from 'libs';
+import { Shortcut } from 'libs';
 import ShortcutRunner from './ShortcutRunner';
 import { useChainId } from 'wagmi';
 import { useEthersSigner } from '../web3/ethersViem';
 import useShortcuts from '../hooks/useShortcuts';
+import { publish, upvote } from '../utils/shortcuts';
 
 const Shortcuts = () => {
   const toast = useToast();

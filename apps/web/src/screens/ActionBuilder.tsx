@@ -12,10 +12,19 @@ import {
 } from '@chakra-ui/react';
 import { useEffect, useMemo, useState } from 'react';
 
-import { Action, etherscan } from 'libs';
+import { ABI, ABIItem, Action, Etherscan } from 'libs';
 import { formatABIItem } from '../utils/abi';
 import { Address } from 'viem';
 import { validateInput } from '../utils/inputs';
+
+const etherscan = new Etherscan({
+  1: import.meta.env.VITE_ETHERSCAN_API_KEY!,
+  10: import.meta.env.VITE_OPTIMISMSCAN_API_KEY!,
+  137: import.meta.env.VITE_POLYGONSCAN_API_KEY!,
+  8453: import.meta.env.VITE_BASESCAN_API_KEY!,
+  84531: import.meta.env.VITE_BASESCAN_API_KEY!,
+  11155111: import.meta.env.VITE_ETHERSCAN_API_KEY!,
+});
 
 interface ActionBuilderProps {
   chainId: number;
@@ -25,8 +34,8 @@ interface ActionBuilderProps {
 const ActionBuilder = ({ chainId, onDone }: ActionBuilderProps) => {
   const [contractAddress, setContractAddress] = useState('');
   const [contractError, setContractError] = useState<string | null>(null);
-  const [abi, setABI] = useState<etherscan.ABI>();
-  const [func, setFunc] = useState<etherscan.ABIItem | null>(null);
+  const [abi, setABI] = useState<ABI>();
+  const [func, setFunc] = useState<ABIItem | null>(null);
   const [inputs, setInputs] = useState<Record<string, any>>({});
 
   useEffect(() => {

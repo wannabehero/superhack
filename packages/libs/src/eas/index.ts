@@ -61,3 +61,5 @@ export const templateUpvoteSchema = new SchemaDefinition(
   '0x6407330affce7ce561a90b2bd380911c1e64becd8fa3ebeccd84aaee01fc292a',
   'string template_id',
 );
+
+export * from './types';

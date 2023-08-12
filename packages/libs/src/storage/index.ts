@@ -1,2 +1,2 @@
-export * as ipfs from './ipfs';
+export * from './ipfs';
 export * as local from './local';

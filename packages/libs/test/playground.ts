@@ -1,7 +1,7 @@
 import { providers, ethers } from 'ethers';
 import { Constant, TestConstant } from '../src/constant/index';
-import { loadLocalShortcuts, publish, retrieve, retrieveAll, simulate, upvote, upvoteCount } from '../src/shortcut';
-import { ABIItem } from '../src/etherscan';
+// import { loadLocalShortcuts, publish, retrieve, retrieveAll, simulate, upvote, upvoteCount } from '../src/shortcut';
+// import { ABIItem } from '../src/etherscan';
 import { eas } from '../src';
 
 const provider = new providers.JsonRpcProvider(

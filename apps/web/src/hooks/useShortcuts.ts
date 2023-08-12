@@ -1,5 +1,6 @@
-import { Shortcut, retrieveAll } from 'libs';
+import { Shortcut } from 'libs';
 import { useCallback, useEffect, useState } from 'react';
+import { retrieveAll } from '../utils/shortcuts';
 
 const useShortcuts = () => {
   const [shortcuts, setShortcuts] = useState<Shortcut[]>();
