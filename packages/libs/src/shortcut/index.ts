@@ -63,16 +63,14 @@ export async function loadLocalShortcuts(): Promise<Shortcut[]> {
         easId: item.eas_id,
         name: item.name,
         chainId: item.chain_id,
+        rating: await upvoteCount(item.eas_id),
       };
     }),
   );
 }
 
-export async function upvoteCount(shortcut: Shortcut): Promise<number> {
-  if (!shortcut.easId) {
-    throw Error('upvoteCount requires `easId` to be nonnull');
-  }
-  const params = [{ name: 'template_id', value: shortcut.easId, type: 'string' }];
+export async function upvoteCount(easId: string): Promise<number> {
+  const params = [{ name: 'template_id', value: easId, type: 'string' }];
   return await CountUpvotes(params);
 }
 
@@ -104,6 +102,7 @@ async function buildShortcut(record: TemplateRecord): Promise<Shortcut> {
     easId: record.id,
     name: template.name.value,
     chainId: template.chain_id.value,
+    rating: await upvoteCount(record.id),
   };
 }
 

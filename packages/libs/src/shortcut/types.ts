@@ -10,4 +10,5 @@ export type Shortcut = {
   chainId: number;
   actions: Action[];
   inputs: Inputs;
+  rating?: number;
 };
