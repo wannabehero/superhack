@@ -442,7 +442,7 @@ const ShortcutRunner = () => {
                 </Text>
                 <ActionsList actions={shortcut.actions} completed={completedActions} />
               </VStack>
-              <HStack>
+              <HStack wrap="wrap">
                 <Button
                   colorScheme="red"
                   onClick={onExecute}
