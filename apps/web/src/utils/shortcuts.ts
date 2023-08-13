@@ -28,6 +28,11 @@ export async function publish(signer: Signer, shortcut: Shortcut): Promise<Short
   };
 }
 
+export function attestationUrl(shortcut: Shortcut) {
+  // positive about hardcoded prefix
+  return `https://optimism.easscan.org/attestation/view/${shortcut.easId}`;
+}
+
 export async function upvote(signer: Signer, easId: string) {
   const params = [{ name: 'template_id', value: easId, type: 'string' }];
   await eas.client.upvote(signer, params, easId);

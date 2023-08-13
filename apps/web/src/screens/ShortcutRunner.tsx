@@ -27,8 +27,8 @@ import {
   Text,
   VStack,
   useToast,
-  IconButton,
   Spacer,
+  Link,
 } from '@chakra-ui/react';
 import { useMemo, useState } from 'react';
 import { loadSafe, useEthersAdapter, useSafeService } from '../web3/safe';
@@ -43,6 +43,7 @@ import { validateInput } from '../utils/inputs';
 import { useEthersSigner } from '../web3/ethersViem';
 import { useLoaderData, useNavigate } from 'react-router-dom';
 import { useChainModal, useConnectModal } from '@rainbow-me/rainbowkit';
+import { attestationUrl } from '../utils/shortcuts';
 
 const tenderly = new Tenderly(import.meta.env.VITE_TENDERLY_ACCESS_KEY!);
 
@@ -422,9 +423,17 @@ const ShortcutRunner = () => {
                   Simulate
                 </Button>
                 <Spacer></Spacer>
+                <Link href={attestationUrl(shortcut)} isExternal>
+                  <Button
+                    leftIcon={<LinkIcon />}
+                    variant="ghost"
+                  >
+                    Inspect with EAS
+                  </Button>
+                </Link>
                 <Button
                   leftIcon={<LinkIcon />}
-                  variant="ghost"
+                  variant="outline"
                   onClick={() => onShare()}
                   alignSelf="flex-start"
                   px="32px"
