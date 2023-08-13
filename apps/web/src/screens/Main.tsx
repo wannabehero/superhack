@@ -1,9 +1,21 @@
 import { Tab, TabList, TabPanel, TabPanels, Tabs } from '@chakra-ui/react';
 import Safes from './Safes';
 import Shortcuts from './Shortcuts';
-import { RouterProvider, createBrowserRouter } from 'react-router-dom';
+import { LoaderFunctionArgs, RouterProvider, createBrowserRouter } from 'react-router-dom';
 import ShortcutRunner from './ShortcutRunner';
 import { retrieve } from '../utils/shortcuts';
+import { Inputs, Shortcut } from 'libs';
+
+async function loader({ request, params }: LoaderFunctionArgs): Promise<[Shortcut, Inputs]> {
+  const shortcut = await retrieve(params.id!);
+  const url = new URL(request.url);
+  for (const [key, value] of url.searchParams.entries()) {
+    console.log(key, value);
+    shortcut.inputs[key] = value;
+  }
+  const inputs = Object.fromEntries(url.searchParams.entries())
+  return [shortcut, inputs];
+}
 
 const router = createBrowserRouter([
   {
@@ -13,7 +25,7 @@ const router = createBrowserRouter([
       {
         path: '/:id',
         element: <ShortcutRunner />,
-        loader: async ({ params }) => retrieve(params.id!),
+        loader: loader,
         errorElement: <></>,
       },
     ],
