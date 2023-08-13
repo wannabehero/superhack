@@ -15,13 +15,6 @@ export async function publish(signer: Signer, shortcut: Shortcut): Promise<Short
   ];
   // onchain attestation for new template
   const easId = await eas.client.publish(signer, params);
-  // store attested template locally
-  local.store({
-    eas_id: easId,
-    name: shortcut.name,
-    chain_id: shortcut.chainId,
-    ipfs_id: ipfsId,
-  });
   return {
     ...shortcut,
     easId,

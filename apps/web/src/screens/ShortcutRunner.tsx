@@ -47,6 +47,9 @@ import { parseEther } from 'viem';
 import { ensClient } from '../web3/wallets';
 import useAssertNetwork from '../hooks/useAssertNetwork';
 import { attestationUrl } from '../utils/shortcuts';
+import { store } from 'libs/src/storage/local';
+import { v4 as uuidv4 } from 'uuid';
+import useBookmarks from '../hooks/useBookmarks';
 
 const tenderly = new Tenderly(import.meta.env.VITE_TENDERLY_ACCESS_KEY!);
 
@@ -166,6 +169,7 @@ const ShortcutRunner = () => {
   const [isSimulating, setIsSimulating] = useState(false);
   const isEOA = useMemo(() => !executor || !safes || !safes.includes(executor), [safes, executor]);
   const signer = useEthersSigner({ chainId });
+  const { fetchBookmarks } = useBookmarks();
 
   const safeApp = useSafeAppsSDK();
 
@@ -244,6 +248,28 @@ const ShortcutRunner = () => {
     } finally {
       setIsSimulating(false);
     }
+  };
+
+  const onBookmark = async () => {
+    if (!shortcut || chainId !== shortcut.chainId) {
+      toast({
+        title: 'TODO: handle multichain shortcuts',
+        status: 'warning',
+      });
+      return;
+    }
+
+    store({ 
+      id: uuidv4(),
+      input: encodedInput(inputs), 
+      ...shortcut,  
+    });
+    toast({
+      title: 'Saved to bookmarks',
+      status: 'info',
+      duration: 2000,
+    });
+    fetchBookmarks();
   };
 
   const onExecute = async () => {
@@ -436,6 +462,15 @@ const ShortcutRunner = () => {
                   isLoading={isSimulating}
                 >
                   Simulate
+                </Button>
+                <Button
+                  variant="ghost"
+                  onClick={onBookmark}
+                  isDisabled={!shortcut.actions.length || !isButtonEnabled}
+                  alignSelf="flex-start"
+                  px="32px"
+                >
+                  Save
                 </Button>
                 <Spacer />
                 <Link href={attestationUrl(shortcut)} isExternal>
