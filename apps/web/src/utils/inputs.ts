@@ -11,12 +11,12 @@ export function validateInput(type: string, value: string | undefined): boolean 
 
   switch (type) {
     case 'address':
-      return isAddress(value);
+      return isAddress(value) || !!value.match(/^\w+\.eth$/);
     case type.startsWith('uint') ? type : '':
       try {
         return BigInt(value) >= 0;
       } catch {
-        return false;
+        return !!value.match(/^\d+\.\d+$/);
       }
     default:
       return true;

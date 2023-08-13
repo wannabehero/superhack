@@ -3,7 +3,6 @@ import {
   VStack,
   Text,
   Spacer,
-  Button,
   Modal,
   ModalOverlay,
   ModalContent,
@@ -13,11 +12,9 @@ import {
   Drawer,
   DrawerOverlay,
   useToast,
-  Card,
-  CardBody,
-  Flex,
+  IconButton,
 } from '@chakra-ui/react';
-import { ArrowUpIcon } from '@chakra-ui/icons';
+import { AddIcon } from '@chakra-ui/icons';
 import { useState } from 'react';
 import ShortcutBuilder from './ShortcutBuilder';
 
@@ -27,6 +24,9 @@ import { useEthersSigner } from '../web3/ethersViem';
 import useShortcuts from '../hooks/useShortcuts';
 import { publish, upvote } from '../utils/shortcuts';
 import { useNavigate, useOutlet } from 'react-router-dom';
+import ShortcutsList from '../components/ShortcutsList';
+import { optimism } from 'wagmi/chains';
+import useAssertNetwork from '../hooks/useAssertNetwork';
 
 const Shortcuts = () => {
   const navigate = useNavigate();
@@ -37,6 +37,7 @@ const Shortcuts = () => {
   const signer = useEthersSigner({ chainId });
   const { shortcuts, fetchShortcuts } = useShortcuts();
   const [isLoading, setIsLoading] = useState(false);
+  const assertNetwork = useAssertNetwork(optimism.id);
 
   const onPublish = async (shortcut: Shortcut) => {
     if (!signer) {
@@ -44,6 +45,9 @@ const Shortcuts = () => {
         title: 'No wallet connected',
         status: 'error',
       });
+      return;
+    }
+    if (!assertNetwork()) {
       return;
     }
     setIsLoading(true);
@@ -78,6 +82,9 @@ const Shortcuts = () => {
       });
       return;
     }
+    if (!assertNetwork()) {
+      return;
+    }
 
     await upvote(signer, easId);
     await fetchShortcuts();
@@ -88,44 +95,21 @@ const Shortcuts = () => {
       <VStack align="stretch">
         <HStack pt="12px">
           <Text as="b" fontSize="xl">
-            Shortcuts
+            Community
           </Text>
           <Spacer />
-          <Button
-            rounded="xl"
+          <IconButton
+            aria-label="Create shortcut"
+            icon={<AddIcon />}
             colorScheme="green"
+            rounded="full"
+            size="md"
             onClick={() => setIsCreateShortcutModalOpen(true)}
-          >
-            Create new
-          </Button>
+            flexShrink={1}
+          />
         </HStack>
         <VStack alignItems="stretch">
-          {!!shortcuts &&
-            shortcuts.map((shortcut) => (
-              <Card key={`shortcut-${shortcut.easId}`} variant="outline">
-                <CardBody>
-                  <Flex align="center">
-                    <Text>{shortcut.name}</Text>
-                    <Spacer />
-                    <Button
-                      leftIcon={<ArrowUpIcon />}
-                      onClick={() => onUpvote(shortcut.easId)}
-                      variant="ghost"
-                      size="sm"
-                      rounded="full"
-                      mr={4}
-                    >
-                      {shortcut.rating === 0
-                        ? 'upvote'
-                        : `${shortcut.rating} ${shortcut.rating === 1 ? 'vote' : 'votes'}`}
-                    </Button>
-                    <Button colorScheme="red" onClick={() => onRun(shortcut.easId)} rounded="full">
-                      Run
-                    </Button>
-                  </Flex>
-                </CardBody>
-              </Card>
-            ))}
+          {!!shortcuts && ShortcutsList({ shortcuts, onUpvote, onRun })}
         </VStack>
       </VStack>
       <Modal

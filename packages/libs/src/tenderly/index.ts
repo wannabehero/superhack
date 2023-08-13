@@ -59,6 +59,7 @@ export class Tenderly {
   }
 
   async simulate(signer: Signer, shortcut: Shortcut): Promise<string[]> {
+    // TODO: batch simulation
     return Promise.all(
       shortcut.actions.map((action) => this.simulateAction(signer, action, shortcut.chainId)),
     );

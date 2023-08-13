@@ -74,6 +74,7 @@ const ShortcutBuilder = ({ onPublish, isLoading }: ShortcutBuilderProps) => {
                   key={`input-${idx}`}
                   name={name}
                   type={type}
+                  isDisabled={isLoading}
                   onRemove={() => setInputs((prev) => prev.filter((_, xdi) => xdi !== idx))}
                   onChange={(name, type) =>
                     setInputs((prev) => {
@@ -85,6 +86,7 @@ const ShortcutBuilder = ({ onPublish, isLoading }: ShortcutBuilderProps) => {
                 />
               ))}
               <Button
+                isDisabled={isLoading}
                 leftIcon={<AddIcon />}
                 onClick={() => setInputs((prev) => [...prev, ['', 'string']])}
                 variant="ghost"
@@ -99,6 +101,7 @@ const ShortcutBuilder = ({ onPublish, isLoading }: ShortcutBuilderProps) => {
               </Text>
               <ActionsList actions={actions} />
               <Button
+                isDisabled={isLoading}
                 leftIcon={<AddIcon />}
                 onClick={() => setIsAddActionModalOpen(true)}
                 variant="ghost"

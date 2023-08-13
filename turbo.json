@@ -14,7 +14,8 @@
         "VITE_BASESCAN_API_KEY",
         "VITE_ETHERSCAN_API_KEY",
         "VITE_WEB3_STORAGE_TOKEN",
-        "VITE_TENDERLY_ACCESS_KEY"
+        "VITE_TENDERLY_ACCESS_KEY",
+        "VITE_SKIP_FIRST_N_SHORTCUTS"
       ],
       "outputs": ["dist/**"]
     },

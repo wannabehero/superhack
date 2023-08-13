@@ -27,7 +27,6 @@ import {
   Text,
   VStack,
   useToast,
-  IconButton,
   Spacer,
 } from '@chakra-ui/react';
 import { useMemo, useState } from 'react';
@@ -42,7 +41,10 @@ import SafeAppsSDK, { BaseTransaction } from '@safe-global/safe-apps-sdk';
 import { validateInput } from '../utils/inputs';
 import { useEthersSigner } from '../web3/ethersViem';
 import { useLoaderData, useNavigate } from 'react-router-dom';
-import { useChainModal, useConnectModal } from '@rainbow-me/rainbowkit';
+import { useConnectModal } from '@rainbow-me/rainbowkit';
+import { parseEther } from 'viem';
+import { ensClient } from '../web3/wallets';
+import useAssertNetwork from '../hooks/useAssertNetwork';
 
 const tenderly = new Tenderly(import.meta.env.VITE_TENDERLY_ACCESS_KEY!);
 
@@ -90,56 +92,67 @@ async function executeWithIndependedSafe({
   return safeTxHash;
 }
 
-function substituteInputsForAction(action: Action, inputs: Inputs): Action {
-  const newAction = { ...action };
+async function resolveInputsForAction(action: Action, inputs: Inputs): Promise<Action> {
+  const newAction = { ...action, inputs: { ...action.inputs } };
   for (const key in action.inputs) {
-    const match = action.inputs[key].match(/^\{(\w+)\}$/);
-    if (match) {
-      newAction.inputs[key] = inputs[match[1]];
+    const template = action.inputs[key].match(/^\{(\w+)\}$/);
+    if (template) {
+      newAction.inputs[key] = inputs[template[1]];
+    }
+    const ens = newAction.inputs[key].match(/^(\w+\.eth)$/);
+    if (ens) {
+      newAction.inputs[key] = (await ensClient.getEnsAddress({ name: ens[1] })) as Address;
     }
   }
-  const match = action.value?.match(/^\{(\w+)\}$/);
-  if (match) {
-    newAction.value = inputs[match[1]] ?? inputs[`{${match[1]}}`];
+  const template = action.value?.match(/^\{(\w+)\}$/);
+  if (template) {
+    newAction.value = inputs[template[1]] ?? inputs[`{${template[1]}}`];
+  }
+  const eth = newAction.value?.match(/^(\d+\.\d+)$/);
+  if (eth) {
+    newAction.value = parseEther(newAction.value!).toString();
   }
   return newAction;
 }
 
-function substituteInputsForShortcut(shortcut: Shortcut, inputs: Inputs): Shortcut {
+async function resolveInputsForShortcut(shortcut: Shortcut, inputs: Inputs): Promise<Shortcut> {
   return {
     ...shortcut,
-    actions: shortcut.actions.map((action) => substituteInputsForAction(action, inputs)),
+    actions: await Promise.all(
+      shortcut.actions.map((action) => resolveInputsForAction(action, inputs)),
+    ),
   };
 }
 
 function encodedInput(inputs: Inputs): string {
-  const filtered = Object.entries(inputs).reduce((acc, [name, value]) => { 
+  const filtered = Object.entries(inputs).reduce((acc, [name, value]) => {
     if (value) {
       acc.set(name, value);
-    } 
+    }
     return acc;
   }, new Map<string, string>());
   const query = new URLSearchParams(Object.fromEntries(filtered));
   if (query.size > 0) {
-    return `?${query.toString()}`
+    return `?${query.toString()}`;
   } else {
-    return ''
+    return '';
   }
 }
 
 const ShortcutRunner = () => {
-  const preset = useLoaderData() as [Shortcut, Inputs] | null;
-  const shortcut = preset?.[0];
+  const preset = useLoaderData() as { shortcut: Shortcut; inputs: Inputs } | undefined;
+  const shortcut = preset?.shortcut;
   const navigate = useNavigate();
   const { openConnectModal } = useConnectModal();
-  const { openChainModal } = useChainModal();
+  const assertNetwork = useAssertNetwork(shortcut?.chainId);
   const toast = useToast();
   const chainId = useChainId();
   const { address } = useAccount();
   const { safes } = useSafes({ chainId, owner: address });
-  const [executor, setExecutor] = useState<Address>();
-  const [inputs, setInputs] = useState<Inputs>(preset?.[1] ?? {});
+  const [executor, setExecutor] = useState<Address | undefined>(address);
+  const [inputs, setInputs] = useState<Inputs>(preset?.inputs ?? {});
   const { chains } = useNetwork();
+  const [completedActions, setCompletedActions] = useState<number[]>([]);
 
   const { data: walletClient } = useWalletClient();
   const publicClient = usePublicClient();
@@ -147,7 +160,7 @@ const ShortcutRunner = () => {
   const ethAdapter = useEthersAdapter({ chainId });
   const safeService = useSafeService({ chainId });
 
-  const [isLoading, setIsLoading] = useState(false);
+  const [isRunning, setIsRunning] = useState(false);
   const [isSimulating, setIsSimulating] = useState(false);
   const isEOA = useMemo(() => !executor || !safes || !safes.includes(executor), [safes, executor]);
   const signer = useEthersSigner({ chainId });
@@ -178,7 +191,6 @@ const ShortcutRunner = () => {
       title: shortcut.name,
       url: `${window.location.origin}/${shortcut.easId}${params}`,
     };
-    console.log(data);
     if (navigator.share && navigator.canShare && navigator.canShare(data)) {
       navigator.share(data);
     } else {
@@ -218,9 +230,9 @@ const ShortcutRunner = () => {
 
     setIsSimulating(true);
     try {
-      const finalised = substituteInputsForShortcut(shortcut, inputs);
+      const finalised = await resolveInputsForShortcut(shortcut, inputs);
       const links = await tenderly.simulate(signer, finalised);
-      window.open(links[0], '_blank', 'noreferrer');
+      links.forEach((link) => window.open(link, '_blank', 'noreferrer'));
     } catch (e: any) {
       toast({
         title: 'Simulation failed',
@@ -257,7 +269,7 @@ const ShortcutRunner = () => {
       return;
     }
 
-    setIsLoading(true);
+    setIsRunning(true);
 
     try {
       let selectedSafe: Safe | null = null;
@@ -277,7 +289,7 @@ const ShortcutRunner = () => {
           selectedSafe,
           walletClient,
           safeService,
-          shortcut: substituteInputsForShortcut(shortcut, inputs),
+          shortcut: await resolveInputsForShortcut(shortcut, inputs),
         });
         toast({
           title: 'Transaction proposed',
@@ -287,7 +299,7 @@ const ShortcutRunner = () => {
       } else if (safeApp.connected && safeApp.safe.safeAddress.length > 0) {
         const safeTxHash = await executeWithIndependedSafe({
           sdk: safeApp.sdk,
-          shortcut: substituteInputsForShortcut(shortcut, inputs),
+          shortcut: await resolveInputsForShortcut(shortcut, inputs),
         });
         toast({
           title: 'Transaction proposed',
@@ -295,21 +307,20 @@ const ShortcutRunner = () => {
           status: 'success',
         });
       } else {
-        // TODO: handle multiple actions flow
-        // probably create a Runner component that handles this
-        // for now, just run the first action
-        const [action] = shortcut.actions;
-
-        // TODO: extract this
-        const txData = prepareTxData(substituteInputsForAction(action, inputs));
-        const txHash = await walletClient.sendTransaction({
-          ...txData,
-          value: BigInt(txData.value),
-        });
-        await publicClient.waitForTransactionReceipt({
-          hash: txHash,
-          confirmations: 2,
-        });
+        const first = completedActions.length ? Math.max(...completedActions) : 0;
+        for (let i = first; i < shortcut.actions.length; i += 1) {
+          const action = shortcut.actions[i];
+          const txData = prepareTxData(await resolveInputsForAction(action, inputs));
+          const txHash = await walletClient.sendTransaction({
+            ...txData,
+            value: BigInt(txData.value),
+          });
+          await publicClient.waitForTransactionReceipt({
+            hash: txHash,
+            confirmations: 4,
+          });
+          setCompletedActions((prev) => [...prev, i]);
+        }
         toast({
           title: 'Success!',
           status: 'success',
@@ -322,8 +333,9 @@ const ShortcutRunner = () => {
         description: e.message,
         status: 'error',
       });
+      setCompletedActions([]);
     } finally {
-      setIsLoading(false);
+      setIsRunning(false);
     }
   };
 
@@ -343,7 +355,7 @@ const ShortcutRunner = () => {
           <DrawerBody>
             <VStack alignItems="stretch" spacing="16px">
               {walletClient && chainId !== shortcut.chainId && (
-                <Button alignSelf="flex-start" onClick={openChainModal} colorScheme="red">
+                <Button alignSelf="flex-start" onClick={assertNetwork} colorScheme="red">
                   Switch to {chains.find((chain) => chain.id === shortcut.chainId)?.name}
                 </Button>
               )}
@@ -354,6 +366,7 @@ const ShortcutRunner = () => {
                     placeholder="Wallet or Safe"
                     value={executor}
                     onChange={(e) => setExecutor(e.target.value as Address)}
+                    isDisabled={isRunning}
                   >
                     <option value={address}>Current: {address}</option>
                     {!!safes &&
@@ -383,6 +396,7 @@ const ShortcutRunner = () => {
                         <InputGroup>
                           <InputLeftAddon children={name.replace(/[{}]/g, '')} />
                           <Input
+                            isDisabled={isRunning || isSimulating}
                             placeholder={name}
                             onChange={(e) => setInputs({ ...inputs, [name]: e.target.value })}
                             value={inputs[name] ?? ''}
@@ -398,7 +412,7 @@ const ShortcutRunner = () => {
                 <Text fontWeight="medium" fontSize="md">
                   Actions
                 </Text>
-                <ActionsList actions={shortcut.actions} />
+                <ActionsList actions={shortcut.actions} completed={completedActions} />
               </VStack>
               <HStack>
                 <Button
@@ -407,7 +421,7 @@ const ShortcutRunner = () => {
                   isDisabled={!executor || !shortcut.actions.length || !isButtonEnabled}
                   alignSelf="flex-start"
                   px="32px"
-                  isLoading={isLoading}
+                  isLoading={isRunning}
                 >
                   {isEOA ? 'Execute' : 'Propose'}
                 </Button>
@@ -421,14 +435,8 @@ const ShortcutRunner = () => {
                 >
                   Simulate
                 </Button>
-                <Spacer></Spacer>
-                <Button
-                  leftIcon={<LinkIcon />}
-                  variant="ghost"
-                  onClick={() => onShare()}
-                  alignSelf="flex-start"
-                  px="32px"
-                >
+                <Spacer />
+                <Button leftIcon={<LinkIcon />} variant="ghost" onClick={() => onShare()} px="32px">
                   Share
                 </Button>
               </HStack>

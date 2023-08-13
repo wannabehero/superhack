@@ -5,11 +5,12 @@ import { ALL_INPUT_TYPES, InputType } from '../utils/consts';
 interface NewInputBuilderProps {
   name: string;
   type: InputType;
+  isDisabled?: boolean;
   onChange: (name: string, type: InputType) => void;
   onRemove: (name: string) => void;
 }
 
-const InputBuilder = ({ name, type, onChange, onRemove }: NewInputBuilderProps) => {
+const InputBuilder = ({ name, type, onChange, onRemove, isDisabled }: NewInputBuilderProps) => {
   return (
     <Flex>
       <Input
@@ -17,6 +18,7 @@ const InputBuilder = ({ name, type, onChange, onRemove }: NewInputBuilderProps) 
         placeholder="input_name"
         onChange={(e) => onChange(e.target.value, type)}
         flexGrow={1}
+        isDisabled={isDisabled}
       />
       <Select
         placeholder="Type"
@@ -24,6 +26,7 @@ const InputBuilder = ({ name, type, onChange, onRemove }: NewInputBuilderProps) 
         onChange={(e) => onChange(name, e.target.value as InputType)}
         flexGrow={1}
         mx={4}
+        isDisabled={isDisabled}
       >
         {ALL_INPUT_TYPES.map((value) => (
           <option key={value} value={value}>
@@ -37,6 +40,7 @@ const InputBuilder = ({ name, type, onChange, onRemove }: NewInputBuilderProps) 
         variant="ghost"
         onClick={() => onRemove(name)}
         flexShrink={1}
+        isDisabled={isDisabled}
       />
     </Flex>
   );
