@@ -8,7 +8,7 @@ import {
   useWalletClient,
 } from 'wagmi';
 import useSafes from '../hooks/useSafes';
-import { LinkIcon } from '@chakra-ui/icons';
+import { ExternalLinkIcon, LinkIcon } from '@chakra-ui/icons';
 import { Action, Inputs, Shortcut, Tenderly } from 'libs';
 import {
   Button,
@@ -28,6 +28,7 @@ import {
   VStack,
   useToast,
   Spacer,
+  Link,
 } from '@chakra-ui/react';
 import { useMemo, useState } from 'react';
 import { loadSafe, useEthersAdapter, useSafeService } from '../web3/safe';
@@ -45,6 +46,7 @@ import { useConnectModal } from '@rainbow-me/rainbowkit';
 import { parseEther } from 'viem';
 import { ensClient } from '../web3/wallets';
 import useAssertNetwork from '../hooks/useAssertNetwork';
+import { attestationUrl } from '../utils/shortcuts';
 
 const tenderly = new Tenderly(import.meta.env.VITE_TENDERLY_ACCESS_KEY!);
 
@@ -436,7 +438,12 @@ const ShortcutRunner = () => {
                   Simulate
                 </Button>
                 <Spacer />
-                <Button leftIcon={<LinkIcon />} variant="ghost" onClick={() => onShare()} px="32px">
+                <Link href={attestationUrl(shortcut)} isExternal>
+                  <Button leftIcon={<ExternalLinkIcon />} variant="ghost">
+                    Inspect
+                  </Button>
+                </Link>
+                <Button leftIcon={<LinkIcon />} variant="ghost" onClick={() => onShare()}>
                   Share
                 </Button>
               </HStack>
