@@ -3,6 +3,7 @@ import { LoaderFunctionArgs, RouterProvider, createBrowserRouter } from 'react-r
 import ShortcutRunner from './ShortcutRunner';
 import { retrieve } from '../utils/shortcuts';
 import { Inputs, Shortcut } from 'libs';
+import { Tab, TabList, TabPanel, TabPanels, Tabs } from '@chakra-ui/react';
 
 async function loader({
   request,
@@ -20,7 +21,22 @@ async function loader({
 const router = createBrowserRouter([
   {
     path: '/',
-    element: <Shortcuts />,
+    element: (
+      <Tabs variant="soft-rounded" colorScheme="green">
+        <TabList>
+          <Tab>Community</Tab>
+          <Tab>Bookmarks</Tab>
+        </TabList>
+        <TabPanels>
+          <TabPanel>
+            <Shortcuts />
+          </TabPanel>
+          <TabPanel>
+            <div>Bookmarks</div>
+          </TabPanel>
+        </TabPanels>
+      </Tabs>
+    ),
     children: [
       {
         path: '/:id',
