@@ -13,7 +13,7 @@ contract DeployDonationScript is Script {
         vm.startBroadcast(deployerPrivateKey);
 
         // trusted forwarder is gelato erc2771
-        Donation donation = new Donation{salt: bytes32(uint256(1337800850))}(
+        Donation donation = new Donation{salt: bytes32(uint256(133780085))}(
             0xb539068872230f20456CF38EC52EF2f91AF4AE49
         );
 
