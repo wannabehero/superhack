@@ -6,7 +6,9 @@ import Safe, { EthersAdapter, SafeAccountConfig, SafeFactory } from '@safe-globa
 import { useEthersSigner } from './ethersViem';
 
 const BASE_URLS: Record<number, string> = {
+  1: 'https://safe-transaction-mainnet.safe.global',
   10: 'https://safe-transaction-optimism.safe.global',
+  100: 'https://safe-transaction-gnosis-chain.safe.global',
   8453: 'https://safe-transaction-base.safe.global',
   84531: 'https://safe-transaction-base-testnet.safe.global',
 };

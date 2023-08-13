@@ -3,19 +3,17 @@ pragma solidity ^0.8.13;
 
 import {Script, console2} from "forge-std/Script.sol";
 
-import {DemoSpender} from "../src/DemoSpender.sol";
-import {DemoToken} from "../src/DemoToken.sol";
+import {Donation} from "../src/Donation.sol";
 
-contract DeployScript is Script {
+contract DeployDonationScript is Script {
     function setUp() public {}
 
     function run() public {
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
         vm.startBroadcast(deployerPrivateKey);
 
-        // trusted forwarder is 0 for now
-        DemoSpender spender = new DemoSpender(address(0));
-        DemoToken token = new DemoToken(address(0));
+        // trusted forwarder is gelato erc2771
+        Donation donation = new Donation(0xb539068872230f20456CF38EC52EF2f91AF4AE49);
 
         vm.stopBroadcast();
     }

@@ -7,7 +7,6 @@
   "scripts": {
     "playground": "ts-node test/playground.ts",
     "build": "tsc",
-    "test": "echo \"Error: no test specified\" && exit 1",
     "compile": "graphql-codegen",
     "watch": "graphql-codegen -w"
   },
