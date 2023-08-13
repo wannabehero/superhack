@@ -1,35 +1,26 @@
-import {
-    HStack,
-    VStack,
-    Text,
-    Spacer,
-    Button,
-    Card,
-    CardBody,
-    Flex,
-  } from '@chakra-ui/react';
-  
+import { HStack, VStack, Text, Spacer, Button, Card, CardBody, Flex } from '@chakra-ui/react';
+
 import useBookmarks from '../hooks/useBookmarks';
 import { LocalTemplate } from 'libs/src/storage/local/types';
 import { useNavigate } from 'react-router-dom';
-  
+
 const Bookmarks = () => {
   const { bookmarks } = useBookmarks();
   const navigate = useNavigate();
 
-  const onClick =  (bookmark: LocalTemplate) => {
+  const onClick = (bookmark: LocalTemplate) => {
     console.log(`/${bookmark.easId}${bookmark.input}`);
     navigate(`${bookmark.easId}${bookmark.input}`);
-  }
+  };
 
   const inputEntries = (bookmark: LocalTemplate) => {
     const query = new URLSearchParams(bookmark.input);
-    var inputs = [];
+    const inputs = [];
     for (const [key, value] of query.entries()) {
-      inputs.push(`${key}: ${value}`)
+      inputs.push(`${key}: ${value}`);
     }
     return inputs;
-  }
+  };
 
   return (
     <>
@@ -50,7 +41,9 @@ const Bookmarks = () => {
                       <Text>{bookmark.name}</Text>
                       <VStack spacing={0} align="left">
                         {inputEntries(bookmark).map((input) => (
-                          <Text fontSize='xs'>{input}</Text>
+                          <Text key={input} fontSize="xs">
+                            {input}
+                          </Text>
                         ))}
                       </VStack>
                     </VStack>
@@ -67,6 +60,5 @@ const Bookmarks = () => {
     </>
   );
 };
-  
+
 export default Bookmarks;
-  
