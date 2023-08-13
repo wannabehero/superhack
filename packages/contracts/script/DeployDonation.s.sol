@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.13;
+pragma solidity ^0.8.15;
 
 import {Script, console2} from "forge-std/Script.sol";
 
@@ -13,7 +13,9 @@ contract DeployDonationScript is Script {
         vm.startBroadcast(deployerPrivateKey);
 
         // trusted forwarder is gelato erc2771
-        Donation donation = new Donation(0xb539068872230f20456CF38EC52EF2f91AF4AE49);
+        Donation donation = new Donation{salt: bytes32(uint256(1337800850))}(
+            0xb539068872230f20456CF38EC52EF2f91AF4AE49
+        );
 
         vm.stopBroadcast();
     }
