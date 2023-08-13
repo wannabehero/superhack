@@ -345,7 +345,7 @@ const ShortcutRunner = () => {
           });
           await publicClient.waitForTransactionReceipt({
             hash: txHash,
-            confirmations: 4,
+            confirmations: 2,
           });
           setCompletedActions((prev) => [...prev, i]);
         }
