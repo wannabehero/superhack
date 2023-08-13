@@ -30,7 +30,7 @@ export async function publish(signer: Signer, shortcut: Shortcut): Promise<Short
 
 export async function upvote(signer: Signer, easId: string) {
   const params = [{ name: 'template_id', value: easId, type: 'string' }];
-  await eas.client.upvote(signer, params);
+  await eas.client.upvote(signer, params, easId);
 }
 
 export async function retrieve(easId: string): Promise<Shortcut> {

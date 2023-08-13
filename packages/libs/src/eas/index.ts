@@ -17,14 +17,15 @@ class EASClient {
     return await this.createAttestation(signer, params, templateSchema);
   }
 
-  async upvote(signer: ethers.Signer, params: SchemaItem[]): Promise<string> {
-    return await this.createAttestation(signer, params, templateUpvoteSchema);
+  async upvote(signer: ethers.Signer, params: SchemaItem[], refUid: string): Promise<string> {
+    return await this.createAttestation(signer, params, templateUpvoteSchema, refUid);
   }
 
   private async createAttestation(
     signer: ethers.Signer,
     params: SchemaItem[],
     schema: SchemaDefinition,
+    refUid?: string,
   ): Promise<string> {
     this.eas.connect(signer);
     const encodedData = schema.encodeData(params);
@@ -35,6 +36,7 @@ class EASClient {
         expirationTime: BigInt(0),
         revocable: false,
         data: encodedData,
+        refUID: refUid,
       },
     });
     return await tx.wait(2);
