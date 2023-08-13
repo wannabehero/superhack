@@ -8,7 +8,7 @@ import {
   useWalletClient,
 } from 'wagmi';
 import useSafes from '../hooks/useSafes';
-import { ExternalLinkIcon, LinkIcon } from '@chakra-ui/icons';
+import { ExternalLinkIcon, LinkIcon, PlusSquareIcon } from '@chakra-ui/icons';
 import { Action, Inputs, Shortcut, Tenderly } from 'libs';
 import {
   Button,
@@ -259,10 +259,10 @@ const ShortcutRunner = () => {
       return;
     }
 
-    store({ 
+    store({
       id: uuidv4(),
-      input: encodedInput(inputs), 
-      ...shortcut,  
+      input: encodedInput(inputs),
+      ...shortcut,
     });
     toast({
       title: 'Saved to bookmarks',
@@ -463,16 +463,15 @@ const ShortcutRunner = () => {
                 >
                   Simulate
                 </Button>
+                <Spacer />
                 <Button
                   variant="ghost"
                   onClick={onBookmark}
                   isDisabled={!shortcut.actions.length || !isButtonEnabled}
-                  alignSelf="flex-start"
-                  px="32px"
+                  leftIcon={<PlusSquareIcon />}
                 >
                   Save
                 </Button>
-                <Spacer />
                 <Link href={attestationUrl(shortcut)} isExternal>
                   <Button leftIcon={<ExternalLinkIcon />} variant="ghost">
                     Inspect

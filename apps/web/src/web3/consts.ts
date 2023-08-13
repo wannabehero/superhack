@@ -1,3 +1,3 @@
-import { Chain, base, baseGoerli, optimism, sepolia, mainnet, gnosis } from 'wagmi/chains';
+import { Chain, base, optimism, mainnet, gnosis } from 'wagmi/chains';
 
-export const CHAINS: Chain[] = [optimism, base, baseGoerli, sepolia, mainnet, gnosis];
+export const CHAINS: Chain[] = [optimism, base, mainnet, gnosis];
