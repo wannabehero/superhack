@@ -1,5 +1,5 @@
 import { Signer } from 'ethers';
-import { IPFSStorage, Shortcut, ShortcutInfo, eas, local, gql } from 'libs';
+import { IPFSStorage, Shortcut, ShortcutInfo, eas, gql } from 'libs';
 
 const ipfs = new IPFSStorage(import.meta.env.VITE_WEB3_STORAGE_TOKEN!);
 const skip = parseInt(import.meta.env.VITE_SKIP_FIRST_N_SHORTCUTS ?? '0');
@@ -43,22 +43,6 @@ export async function retrieveAll(): Promise<ShortcutInfo[]> {
   const templatesData = await gql.GetAllTemplates(skip);
   return Promise.all(templatesData.map(buildShortcutInfo)).then((shortcuts) =>
     shortcuts.sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0)),
-  );
-}
-
-export async function loadLocalShortcuts(): Promise<Shortcut[]> {
-  const localTemplates = local.retrieve();
-  return Promise.all(
-    localTemplates.map(async (item) => {
-      const payload = await ipfs.retrieve(item.ipfs_id);
-      return {
-        ...JSON.parse(payload),
-        easId: item.eas_id,
-        name: item.name,
-        chainId: item.chain_id,
-        rating: await upvoteCount(item.eas_id),
-      };
-    }),
   );
 }
 

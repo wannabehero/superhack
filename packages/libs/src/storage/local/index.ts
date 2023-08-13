@@ -16,3 +16,5 @@ export function retrieve(): LocalTemplate[] {
     return [];
   }
 }
+
+export * from './types';

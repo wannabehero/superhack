@@ -1,7 +1,7 @@
 export interface LocalTemplate {
-  id: string,
+  id: string;
   name: string;
   easId?: string;
   chainId: number;
-  input: string,
+  input: string;
 }

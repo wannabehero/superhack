@@ -1,6 +1,6 @@
 import { HStack, VStack, Text, Spacer, Button, Card, CardBody, Flex } from '@chakra-ui/react';
 
-import { LocalTemplate } from 'libs/src/storage/local/types';
+import { local } from 'libs';
 import { useNavigate } from 'react-router-dom';
 import { useContext } from 'react';
 import { BookmarksContext } from './BookmarksContext';
@@ -9,12 +9,12 @@ const Bookmarks = () => {
   const bookmarks = useContext(BookmarksContext);
   const navigate = useNavigate();
 
-  const onClick = (bookmark: LocalTemplate) => {
+  const onClick = (bookmark: local.LocalTemplate) => {
     console.log(`/${bookmark.easId}${bookmark.input}`);
     navigate(`${bookmark.easId}${bookmark.input}`);
   };
 
-  const inputEntries = (bookmark: LocalTemplate) => {
+  const inputEntries = (bookmark: local.LocalTemplate) => {
     const query = new URLSearchParams(bookmark.input);
     const inputs = [];
     for (const [key, value] of query.entries()) {

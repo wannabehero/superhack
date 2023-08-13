@@ -1,5 +1,5 @@
-import { LocalTemplate } from 'libs/src/storage/local/types';
+import { local } from 'libs';
 import { createContext } from 'react';
 
-export const BookmarksContext = createContext<LocalTemplate[]>([]);
+export const BookmarksContext = createContext<local.LocalTemplate[]>([]);
 export const BookmarksDispatchContext = createContext<() => void>(() => {});

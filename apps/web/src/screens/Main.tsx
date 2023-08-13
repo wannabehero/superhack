@@ -21,45 +21,48 @@ async function loader({
   };
 }
 
-const router = () => {
+const Root = () => {
   const { bookmarks, fetchBookmarks } = useBookmarks();
-  return createBrowserRouter([
-    {
-      path: '/',
-      element: (
-        <BookmarksContext.Provider value={bookmarks ?? []}>
-          <BookmarksDispatchContext.Provider value={fetchBookmarks}>
-            <Tabs variant="soft-rounded" colorScheme="green">
-              <TabList>
-                <Tab>Community</Tab>
-                <Tab>Bookmarks</Tab>
-              </TabList>
-              <TabPanels>
-                <TabPanel>
-                  <Shortcuts />
-                </TabPanel>
-                <TabPanel>
-                  <Bookmarks />
-                </TabPanel>
-              </TabPanels>
-            </Tabs>
-          </BookmarksDispatchContext.Provider>
-        </BookmarksContext.Provider>
-      ),
-      children: [
-        {
-          path: '/:id',
-          element: <ShortcutRunner />,
-          loader: loader,
-          errorElement: <></>,
-        },
-      ],
-    },
-  ])
+
+  return (
+    <BookmarksContext.Provider value={bookmarks ?? []}>
+      <BookmarksDispatchContext.Provider value={fetchBookmarks}>
+        <Tabs variant="soft-rounded" colorScheme="green">
+          <TabList>
+            <Tab>Community</Tab>
+            <Tab>Bookmarks</Tab>
+          </TabList>
+          <TabPanels>
+            <TabPanel>
+              <Shortcuts />
+            </TabPanel>
+            <TabPanel>
+              <Bookmarks />
+            </TabPanel>
+          </TabPanels>
+        </Tabs>
+      </BookmarksDispatchContext.Provider>
+    </BookmarksContext.Provider>
+  );
 };
 
+const router = createBrowserRouter([
+  {
+    path: '/',
+    element: <Root />,
+    children: [
+      {
+        path: '/:id',
+        element: <ShortcutRunner />,
+        loader: loader,
+        errorElement: <></>,
+      },
+    ],
+  },
+]);
+
 const Main = () => {
-  return <RouterProvider router={router()} />;
+  return <RouterProvider router={router} />;
 };
 
 export default Main;

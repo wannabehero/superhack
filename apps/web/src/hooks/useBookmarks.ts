@@ -1,12 +1,11 @@
 import { useCallback, useEffect, useState } from 'react';
-import { LocalTemplate } from 'libs/src/storage/local/types';
-import { retrieve } from 'libs/src/storage/local';
+import { local } from 'libs';
 
 const useBookmarks = () => {
-  const [bookmarks, setBookmarks] = useState<LocalTemplate[]>();
+  const [bookmarks, setBookmarks] = useState<local.LocalTemplate[]>();
 
   const fetchBookmarks = useCallback(() => {
-    setBookmarks(retrieve());
+    setBookmarks(local.retrieve());
   }, [setBookmarks]);
 
   useEffect(() => {
