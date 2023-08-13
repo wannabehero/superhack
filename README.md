@@ -10,6 +10,18 @@ Examples include:
 - donate erc20 / eth
 - using any investment strategy
 
+## See it in action!
+
+We've prepared some action for you to try
+
+- [Donate us some ETH on Base](https://shortcuts.wtf/0x21ec6f3370cea37f77d8cb76e6a7232f0c448fd148f1425279a4fa9d69201aae?to=0xEbaA21B8fC22a88912938e971897F88f69493C47&amount=0.001)
+- [Donate us some USDbC on Base](https://shortcuts.wtf/0x61ca42bed268c5add8533255a9fe129d2671e53e4b200b81fe586accad66d0f8?amount=1000000&to=0xEbaA21B8fC22a88912938e971897F88f69493C47)
+- [Donate us some ETH on Optimism](https://shortcuts.wtf/0x876ff304a858cf79e292e7ba7a43eebcc8a88f77565db6c2500b88e15e75fc07?amount=0.001&to=0x78c7881eaa2dd9488dDB8321c78Fb373e6FAb265)
+- [Donate us some OP on Optimism](https://shortcuts.wtf/0xa3d80dd1d54aec8caa19f9355aeda7fbb075f2d7cc05fdfea29b8a2c7f17a023?to=0x78c7881eaa2dd9488dDB8321c78Fb373e6FAb265&amount=1000000000000000000)
+
+- [Bridge ETH to Base](https://shortcuts.wtf/0x57479e7e73317e7b38ccdbae2c201b381e5baddbdcbaacda584643a8543b740f)
+- [Bridge ETH to Optimism](https://shortcuts.wtf/0x82c0521978c1a6c1dc699bf6846abb078558d4b1b6a91e477bbaa3f69dc1ae5f)
+
 ## Notes
 The best experience is achieved when using the Safe as the shortcut is being run in a single transaction.
 
