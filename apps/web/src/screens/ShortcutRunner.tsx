@@ -30,7 +30,7 @@ import {
   Spacer,
   Link,
 } from '@chakra-ui/react';
-import { useMemo, useState } from 'react';
+import { useContext, useMemo, useState } from 'react';
 import { loadSafe, useEthersAdapter, useSafeService } from '../web3/safe';
 import Safe from '@safe-global/protocol-kit';
 import { MetaTransactionData, OperationType } from '@safe-global/safe-core-sdk-types';
@@ -49,7 +49,7 @@ import useAssertNetwork from '../hooks/useAssertNetwork';
 import { attestationUrl } from '../utils/shortcuts';
 import { store } from 'libs/src/storage/local';
 import { v4 as uuidv4 } from 'uuid';
-import useBookmarks from '../hooks/useBookmarks';
+import { BookmarksDispatchContext } from './BookmarksContext';
 
 const tenderly = new Tenderly(import.meta.env.VITE_TENDERLY_ACCESS_KEY!);
 
@@ -169,7 +169,7 @@ const ShortcutRunner = () => {
   const [isSimulating, setIsSimulating] = useState(false);
   const isEOA = useMemo(() => !executor || !safes || !safes.includes(executor), [safes, executor]);
   const signer = useEthersSigner({ chainId });
-  const { fetchBookmarks } = useBookmarks();
+  const fetchBookmarks = useContext(BookmarksDispatchContext);
 
   const safeApp = useSafeAppsSDK();
 

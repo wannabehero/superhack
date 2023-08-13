@@ -9,12 +9,13 @@ import {
     Flex,
   } from '@chakra-ui/react';
   
-import useBookmarks from '../hooks/useBookmarks';
 import { LocalTemplate } from 'libs/src/storage/local/types';
 import { useNavigate } from 'react-router-dom';
+import { BookmarksContext } from './BookmarksContext';
+import { useContext } from 'react';
   
 const Bookmarks = () => {
-  const { bookmarks } = useBookmarks();
+  const bookmarks = useContext(BookmarksContext);
   const navigate = useNavigate();
 
   const onClick =  (bookmark: LocalTemplate) => {
